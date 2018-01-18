@@ -152,8 +152,11 @@ private void scanSeparator() throws IOException{
 			column=0;
 		}
 		currentChar = getChar();
-		
 		//takeIt();
+		break;
+	case '!':
+		while(isGraphic(currentChar))
+			currentChar=getChar();
 		break;
 	}
 	//falta implementar o comentario com // ou /*
@@ -161,7 +164,7 @@ private void scanSeparator() throws IOException{
 //metodo que retorna um token do buffer
 public Token scan() throws IOException, EOFException{
 	try{
-	while((currentChar == ' ')|| (currentChar == '\n') || (currentChar == '\r')){
+	while((currentChar == ' ')|| (currentChar == '\n') || (currentChar == '\r') || (currentChar=='!')){
 		scanSeparator();
 	}
 	
@@ -202,6 +205,13 @@ private boolean isDigit(Character c){
 private boolean isLetter(Character c){
 	int valorAsc2 = (int)c;
 	if(valorAsc2 >= 97 && valorAsc2 <= 122)
+		return true;
+	return false;
+}
+
+private boolean isGraphic(Character c){
+	int valorAsc2 = (int)c;
+	if(valorAsc2 >= 32 && valorAsc2 <=126)
 		return true;
 	return false;
 }
