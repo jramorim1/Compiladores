@@ -6,7 +6,7 @@ public class Main {
 	public static void main(String[] args){
 		// TODO Auto-generated method stub
 		try{
-		String path = "C:\\Users\\jramo\\Downloads\\Compiladores-20180118T124317Z-001\\Teste\\src\\programa.txt";
+		String path = "C:\\Users\\oieus\\git\\Compiladores\\src\\programa.txt";
 		Scanner scanner = new Scanner(path);
 		Token t = scanner.scan();
 		while(t.code != 99){
