@@ -82,8 +82,16 @@ public class Parser {
     
     private void parseDeclaracao() throws IOException{
     	
-    	if(currentToken.code==Token.FUNCTION){
-    		acceptIt();
+    	switch(currentToken.code){
+    		
+    	case Token.VAR:
+    		parseDeclaracaoDeVariavel();
+    	
+    	case Token.FUNCTION:
+    		parseDeclaracaoDeFuncao();
+    	
+    	case Token.PROCEDURE:
+    		
     	}
 		
 	}
