@@ -1,5 +1,5 @@
 import java.io.IOException;
-//sd
+
 public class Parser {
 	
 	private Token currentToken;
@@ -11,19 +11,68 @@ public class Parser {
 		currentToken = scanner.scan();
 	}
 	
-	private void parsePrograma(){
+	private void acceptIt() throws IOException{
+		
+		if(Token.ERRO!=currentToken.code)
+		currentToken = this.scanner.scan();
+		else
+		erro();
 		
 	}
 	
-	private void parseComando(){
+	private void erro(){
 		
+		System.out.println("ERRO");
+		
+	}
+	
+	private void parsePrograma() {
+		
+	}
+	
+	private void parseComando() throws IOException{
+		
+		switch(currentToken.code){
+		
+		case Token.IF:
+			parseCondicional();
+		
+		case Token.WHILE:
+			parseIterativo();
+		
+		case Token.BEGIN:
+			parseComandoComposto();
+			
+		default:
+			erro();
+		}
+			
 	}
 	
 	private void parseComandoComposto(){
 		
 	}
     
-	private void parseCondicional(){
+	private void parseCondicional() throws IOException{
+		
+		if(currentToken.code==Token.IF){
+			acceptIt();
+			parseExpressao();
+			if(currentToken.code==Token.THEN){
+				acceptIt();
+				parseComando();
+				if(currentToken.code==Token.ELSE){
+					acceptIt();
+					parseComando();
+				}
+				
+			}
+			else
+				erro();
+		}
+		
+		else
+			erro();
 		
 	}
 	
@@ -31,7 +80,11 @@ public class Parser {
 		
 	}
     
-    private void parseDeclaracao(){
+    private void parseDeclaracao() throws IOException{
+    	
+    	if(currentToken.code==Token.FUNCTION){
+    		
+    	}
 		
 	}
     
