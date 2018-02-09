@@ -1,5 +1,5 @@
 import java.io.IOException;
-
+//aa
 public class Parser {
 	
 	private Token currentToken;
@@ -91,16 +91,60 @@ public class Parser {
     		parseDeclaracaoDeFuncao();
     	
     	case Token.PROCEDURE:
-    		
+    		parseDeclaracaoDeProcedimento();
+    	
+    	default:
+    		erro();
     	}
-		
 	}
     
     private void parseDeclaracaoDeFuncao(){
 		
 	}
     
-    private void parseDeclaracaoDeProcedimento(){
+    private void parseDeclaracaoDeProcedimento() throws IOException{
+    	
+    	if(currentToken.code==Token.PROCEDURE){
+    
+    		acceptIt();
+    		if(currentToken.code==Token.IDENTIFIER){
+    			
+    			acceptIt();
+    			if(currentToken.code==Token.LPAREN){
+    				
+    				acceptIt();
+    				if(currentToken.code==Token.VAR || currentToken.code==Token.IDENTIFIER){
+    					
+    					parseListaDeParametros();
+    				}
+    				if(currentToken.code==Token.RPAREN){
+    					
+        				acceptIt();
+        				if(currentToken.code==Token.SEMICOLON){
+        					
+            				acceptIt();
+            				if(currentToken.code==Token.BEGIN || currentToken.code==Token.VAR || currentToken.code==Token.FUNCTION || currentToken.code==Token.PROCEDURE ){
+            					
+            					parseCorpo();
+            				}
+            				else
+            					erro();
+        				}
+        				else
+        					erro();
+    				}
+    				else
+    					erro();
+    			}
+    			else
+            		erro();
+    		}
+    		else
+        		erro();
+    		   	     	
+    	}
+    	else
+    		erro();
 		
 	}
     
@@ -108,7 +152,29 @@ public class Parser {
 		
 	}
     
-    private void parseExpressao(){
+    private void parseExpressao() throws IOException{
+    	
+    	if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
+			
+			parseTermo();
+			while(currentToken.code==Token.OPAD){
+				acceptIt();
+				parseTermo();
+			}
+			if(currentToken.code==Token.OPREL){
+				acceptIt();
+				parseTermo();
+				while(currentToken.code==Token.OPAD){
+					acceptIt();
+					parseTermo();
+				}
+			}
+			else
+				erro();
+			
+		}
+		else
+			erro();
 		
 	}   
     
@@ -116,8 +182,21 @@ public class Parser {
 		
 	}
     
-    private void parseIterativo(){
+    private void parseIterativo() throws IOException{
 		
+    	if(currentToken.code==Token.WHILE){
+			acceptIt();
+    		parseExpressao();
+    		if(currentToken.code==Token.DO){
+    			acceptIt();
+    			parseComando();
+    		}
+    		else
+    			erro();
+			
+		}
+		else
+			erro();
 	}
     
     
@@ -125,32 +204,81 @@ public class Parser {
 		
 	}
 	
-    private void parseListaDeIDs(){
-		
+    private void parseListaDeIDs() throws IOException{
+		if(currentToken.code==Token.IDENTIFIER){
+			acceptIt();
+			while(currentToken.code==Token.POINT){
+				acceptIt();
+				if(currentToken.code==Token.IDENTIFIER){
+					acceptIt();
+				}
+				else
+					erro();
+			}
+		}
+		else
+			erro();
 	}
     
     private void parseListaDeParametros(){
 		
 	}
     
-    private void parseParametros(){
+    private void parseParametros() throws IOException{
 		
+    	switch(currentToken.code){
+    	
+    	case Token.VAR:
+    		acceptIt();
+    		parseListaDeIDs();
+    		if(currentToken.code==Token.COLON){
+    			acceptIt();
+    			parseTipoSimples();
+    		}
+    		else
+    			erro();
+    	case Token.IDENTIFIER:	
+    		parseListaDeIDs();
+    		if(currentToken.code==Token.COLON){
+    			acceptIt();
+    			parseTipoSimples();
+    		}
+    		else
+    			erro();
+    	
+    	default:
+    		erro();
+    	}
 	}
     
     private void parseTermo(){
 		
 	}
     
-    private void parseTipo(){
+    private void parseTipo() throws IOException{
+		switch(currentToken.code){
 		
+		case Token.ARRAY:
+			parseTipoAgregado();
+		
+		case Token.INTEGER:
+			parseTipoSimples();
+		
+		default:
+			erro();
+		}
 	}
     
     private void parseTipoAgregado(){
 		
 	}
     
-    private void parseTipoSimples(){
-		
+    private void parseTipoSimples() throws IOException{
+		if(currentToken.code==Token.INTEGER || currentToken.code==Token.REAL || currentToken.code==Token.BOOLEAN){
+			acceptIt();
+		}
+		else
+			erro();
 	}
 
 }
