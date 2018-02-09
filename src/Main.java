@@ -9,7 +9,7 @@ public class Main {
 		String path = "C:\\Users\\oieus\\git\\Compiladores\\src\\programa.txt";
 		Scanner scanner = new Scanner(path);
 		Token t = scanner.scan();
-		while(t.code != 99){
+		while(t.code != 99 && t.code != 98){
 			System.out.println("name: " + t.spelling);
 			System.out.println("code: " + t.code);
 			System.out.println("line: " + t.linha);

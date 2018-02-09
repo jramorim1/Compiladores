@@ -33,9 +33,22 @@ public class Scanner {
 			column++;
 		return c;
 	}
+	private boolean compare(char c) {
+		if(isNull())
+			return false;
+		else
+			return (currentChar == c);
+	}
+	
+	private boolean isNull() {
+		return currentChar == null;
+	}
 	
 	private boolean lookahead(int c) throws IOException{
+	
 		int next = this.reader.read();
+		if(next == -1)
+			return false;
 		if(next == c) {
 			this.reader.unread(next);
 			return true;
@@ -64,7 +77,7 @@ public class Scanner {
 			takeIt();
 			while(isDigit(currentChar))
 				takeIt();
-					if(currentChar == '.'){
+					if(compare('.')){
 						if(lookahead('.')) {
 							return Token.INTLITERAL;
 						}
@@ -85,7 +98,7 @@ public class Scanner {
 				while(isDigit(currentChar))
 					takeIt();
 				return Token.FLOATLIT;
-			}else if(currentChar == '.') {
+			}else if(compare('.')) {
 				takeIt();
 				return Token.DOUBLEDOT;
 			}
@@ -106,10 +119,10 @@ public class Scanner {
 			
 		case '<':
 			takeIt();
-			if(currentChar == '='){
+			if(compare('=')){
 				takeIt();
 				return Token.OPREL;
-			}else if(currentChar == '>'){
+			}else if(compare('>')){
 				takeIt();
 				return Token.OPREL;
 			}else
@@ -117,15 +130,13 @@ public class Scanner {
 			
 		case '>':
 			takeIt();
-			if(currentChar == '='){
+			if(compare('='))
 				takeIt();
-				return Token.OPREL;
-			}else
-				return Token.OPREL;
+			return Token.OPREL;
 			
 		case ':':
 			takeIt();
-			if(currentChar == '='){
+			if(compare('=')){
 				takeIt();
 				return Token.BECOMES;
 			}else
@@ -165,7 +176,7 @@ public class Scanner {
 private void scanSeparator() throws IOException{
 	switch(currentChar){
 	case ' ': case '\n': case '\r':
-		if(currentChar == '\n'){
+		if(compare('\n')){
 			line++;
 			column=0;
 		}
@@ -182,11 +193,14 @@ private void scanSeparator() throws IOException{
 //metodo que retorna um token do buffer
 public Token scan() throws IOException, EOFException{
 	
-	if(currentChar == null)
+	if(isNull())
 		return new Token(Token.EOF,"fim do arquivo",line,column);
 	
-	while((currentChar == ' ')|| (currentChar == '\n') || (currentChar == '\r') || (currentChar=='!')){
+	while(compare(' ')|| compare('\n') || compare('\r') || compare('!')){
 		scanSeparator();
+		if(isNull())
+			return new Token(Token.EOF,"fim do arquivo",line,column);
+			
 	}
 	
 	currentSpelling = new StringBuffer("");
