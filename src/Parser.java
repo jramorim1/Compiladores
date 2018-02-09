@@ -42,6 +42,34 @@ public class Parser {
 		
 		case Token.BEGIN:
 			parseComandoComposto();
+		
+		case Token.IDENTIFIER:
+			acceptIt();
+			while(currentToken.code==Token.LCOL){
+				acceptIt();
+				parseExpressao();
+				if(currentToken.code==Token.RCOL)
+					acceptIt();
+				else
+					erro();
+			}
+			if(currentToken.code==Token.BECOMES){
+				acceptIt();
+				parseExpressao();
+				
+			}
+			else 
+				erro();
+		
+		case Token.RPAREN:
+			acceptIt();
+			if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
+				parseListaDeExpressoes();
+			}
+			if(currentToken.code==Token.LPAREN)
+				acceptIt();
+			else
+				erro();
 			
 		default:
 			erro();

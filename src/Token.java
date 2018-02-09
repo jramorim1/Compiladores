@@ -63,9 +63,9 @@ DOUBLEDOT = 31,  //..
 LPAREN = 32, //(
 RPAREN = 33,  //)
 LCOL = 34,  //[
-RCOL = 35,
+RCOL = 35, //]
 PROCEDURE = 36,
-ERRO = 98,//]
+ERRO = 98,
 EOF = 99;
 
 private final static String[] SPELLINGS = {"IDENTIFIER","if","else","then","true","false","begin","end","function","var",
