@@ -25,14 +25,27 @@ public class Scanner {
 	
 	//metodo que retorna o proximo char do buffer
 	//se for EOF retorna null
-	public char getChar() throws IOException{
+	public Character getChar() throws IOException{
 		Character c = null;
 		int i = (int)this.reader.read();
-		if(i != -1)
+		if(i != -1) 
 			c = (char)i;
-		column++;
+			column++;
 		return c;
 	}
+	
+	private boolean lookahead(int c) throws IOException{
+		int next = this.reader.read();
+		if(next == c) {
+			this.reader.unread(next);
+			return true;
+		}
+		else
+			this.reader.unread(next);
+		return false;
+	}
+	
+	
 	
 	//Metodo que retorna um token
 	private byte scanToken() throws IOException{
@@ -52,6 +65,9 @@ public class Scanner {
 			while(isDigit(currentChar))
 				takeIt();
 					if(currentChar == '.'){
+						if(lookahead('.')) {
+							return Token.INTLITERAL;
+						}
 						takeIt();
 						if(isDigit(currentChar)){
 							takeIt();
@@ -69,8 +85,10 @@ public class Scanner {
 				while(isDigit(currentChar))
 					takeIt();
 				return Token.FLOATLIT;
-			}else if(currentChar == '.')
+			}else if(currentChar == '.') {
+				takeIt();
 				return Token.DOUBLEDOT;
+			}
 			else 
 				return Token.DOT;
 			
@@ -163,7 +181,10 @@ private void scanSeparator() throws IOException{
 }
 //metodo que retorna um token do buffer
 public Token scan() throws IOException, EOFException{
-	try{
+	
+	if(currentChar == null)
+		return new Token(Token.EOF,"fim do arquivo",line,column);
+	
 	while((currentChar == ' ')|| (currentChar == '\n') || (currentChar == '\r') || (currentChar=='!')){
 		scanSeparator();
 	}
@@ -172,9 +193,6 @@ public Token scan() throws IOException, EOFException{
 	currentCode = scanToken();
 	
 	return new Token(currentCode,currentSpelling.toString(),line,column-currentSpelling.toString().length());
-	}catch(NullPointerException e){
-		return new Token(Token.EOF,"fim do arquivo",line,column);
-	}
 }
 	
 //metodo que aceita um char condicional
@@ -195,7 +213,10 @@ private void takeIt() throws IOException{
 
 //metodo que verifica se é digito
 private boolean isDigit(Character c){
+	if(c == null)
+		return false;
 	int valorAsc2 = (int)c;
+	
 	if(valorAsc2 >= 48 && valorAsc2 <= 57)
 		return true;
 	return false;
@@ -203,14 +224,20 @@ private boolean isDigit(Character c){
 
 //metodo que verifica se é letra
 private boolean isLetter(Character c){
+	if(c == null)
+		return false;
 	int valorAsc2 = (int)c;
+	
 	if(valorAsc2 >= 97 && valorAsc2 <= 122)
 		return true;
 	return false;
 }
 
 private boolean isGraphic(Character c){
+	if(c == null)
+		return false;
 	int valorAsc2 = (int)c;
+	
 	if(valorAsc2 >= 32 && valorAsc2 <=126)
 		return true;
 	return false;

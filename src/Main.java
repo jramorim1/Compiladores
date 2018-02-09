@@ -14,6 +14,7 @@ public class Main {
 			System.out.println("code: " + t.code);
 			System.out.println("line: " + t.linha);
 			System.out.println("column: " + t.coluna);
+			System.out.println("#------------------#");
 			t = scanner.scan();
 		}
 		System.out.println(""+t.spelling);
