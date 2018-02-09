@@ -12,7 +12,7 @@ public Token(byte codigo, String spell, int linha, int coluna){
 	this.coluna = coluna;
 	//verifica qual o identificador e atribui o codigo certo a ele
 	if(this.code == IDENTIFIER){
-		for(byte k = IF; k < RCOL; k++){
+		for(byte k = IF; k <= PROCEDURE; k++){
 			if(this.spelling.equals(SPELLINGS[k])){
 				if(this.spelling.compareTo("true") == 0 || this.spelling.compareTo("false") == 0)
 					this.code = BOOLLIT;

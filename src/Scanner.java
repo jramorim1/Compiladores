@@ -167,6 +167,7 @@ public class Scanner {
 			return Token.RPAREN;
 			
 		default:
+			takeIt();
 			return Token.ERRO;
 			
 		}

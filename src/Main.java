@@ -6,10 +6,10 @@ public class Main {
 	public static void main(String[] args){
 		// TODO Auto-generated method stub
 		try{
-		String path = "C:\\Users\\oieus\\git\\Compiladores\\src\\programa.txt";
+		String path = "D:\\test.txt";	
 		Scanner scanner = new Scanner(path);
 		Token t = scanner.scan();
-		while(t.code != 99 && t.code != 98){
+		while(t.code != 99){
 			System.out.println("name: " + t.spelling);
 			System.out.println("code: " + t.code);
 			System.out.println("line: " + t.linha);
