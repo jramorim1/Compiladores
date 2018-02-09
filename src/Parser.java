@@ -83,7 +83,7 @@ public class Parser {
     private void parseDeclaracao() throws IOException{
     	
     	if(currentToken.code==Token.FUNCTION){
-    		
+    		acceptIt();
     	}
 		
 	}
