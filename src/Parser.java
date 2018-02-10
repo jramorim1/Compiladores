@@ -6,164 +6,162 @@ public class Parser {
 	private Scanner scanner;
 	
 	public Parser(String path) throws IOException{
-		
 		scanner = new Scanner(path);
-		currentToken = scanner.scan();
 	}
 	
-	private void acceptIt() throws IOException{
-		
-		if(Token.ERRO!=currentToken.code)
+	private void acceptIt(){
+		try {
 		currentToken = this.scanner.scan();
-		else
-		erro();
-		
-	}
-	
-	private void erro(){
-		
-		System.out.println("ERRO");
-		
-	}
-	
-	private void parsePrograma() throws IOException {
-		
-		if(currentToken.code==Token.PROGRAM){
-			acceptIt();
-			if(currentToken.code==Token.IDENTIFIER){
-				acceptIt();
-				if(currentToken.code==Token.SEMICOLON){
-					acceptIt();
-					parseCorpo();
-				}
-				else
-					erro();
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
 			}
-			else
-				erro();
+	}
+	
+	private void accept(byte ExpectedKind){
+		try {
+		if(currentToken.code == ExpectedKind) {
+			currentToken = this.scanner.scan();
+		}else
+			SyntacticError1(currentToken);
+		
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
 		}
-		else
-			erro();
+	}
+	
+	public void parse() {
+		try {
+		currentToken = scanner.scan();
+		parsePrograma();
+		if(compare(Token.EOF)) {
+			System.out.println("Fim do arquivo");
+		}
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	private void LexicError(Token t) {
+		System.out.println("Erro line " + t.linha + " colum "+ t.coluna + "Token "+ t.spelling + " is not acceptable.");
+	}
+	
+	private void SyntacticError1(Token t){
+		System.out.println("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Unexpected token "+t.spelling+ ".");
+	}
+	
+	private void SyntacticError2(Token t){
+		System.out.println("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Missing token "+t.spelling+ ".");
 		
 	}
 	
-	private void parseComando() throws IOException{
+	private void parsePrograma(){
+			accept(Token.PROGRAM);
+			parseIdentifier();
+			accept(Token.SEMICOLON);
+			parseCorpo();
+			accept(Token.DOT);
+	}
+	
+	private void parseIdentifier(){
+		accept(Token.IDENTIFIER);
+	}
+
+	private void parseComando(){
 		
 		switch(currentToken.code){
-		
-		case Token.IF:
+		case Token.IF:	//para a regra de condição, first if
 			parseCondicional();
 			break;
 		
-		case Token.WHILE:
+		case Token.WHILE:	// para a regra de iteraçao, first while
 			parseIterativo();
 			break;
 		
-		case Token.BEGIN:
+		case Token.BEGIN:	//para a regra de begin, first begin
 			parseComandoComposto();
 			break;
 		
-		case Token.IDENTIFIER:
-			acceptIt();
-			while(currentToken.code==Token.LCOL){
-				acceptIt();
-				parseExpressao();
-				if(currentToken.code==Token.RCOL)
-					acceptIt();
-				else
-					erro();
-			}
-			if(currentToken.code==Token.BECOMES){
-				acceptIt();
-				parseExpressao();
-				
-			}
-			else 
-				erro();
-			break;
-		
-		case Token.RPAREN:
-			acceptIt();
-			if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
-				parseListaDeExpressoes();
-			}
-			if(currentToken.code==Token.LPAREN)
-				acceptIt();
-			else
-				erro();
-			break;
+		case Token.IDENTIFIER:	
+			parseIdentifier(); //reconhece o identificador
 			
-		default:
-			erro();
+			/**para as regras de atribuição e chamada de procedimento
+			 * fazendo a fatoração das duas regras, first externo é id
+			 * apos isso é verificado as regras 
+			 * [expressao]* := expressao
+			 * (lista de expressao | vazio) 
+			 * 
+			 * como os firsts dessas regras internas são disjuntos
+			 * podemos aplicar o algoritmo
+			 * */
+			
+			switch(currentToken.code) {  //faz um switch interno para verificar as proximas regras
+		
+		case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*" 
+			while(currentToken.code == Token.RCOL) {
+				acceptIt();
+				parseExpressao();
+				accept(Token.RCOL);
+			}
+			case Token.BECOMES:	//se nao foi o [ mas foi o := , entao pega := expressao
+				acceptIt();
+				parseExpressao();
+				break;	//sai do laço interno
+				
+				
+			case Token.LPAREN: // "(" (<lista-de-expressões> | <vazio>) ")"	 OBS first lista={bool, int, float, lparen}
+				acceptIt();
+				
+				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
+					parseListaDeExpressoes();
+				
+				accept(Token.RPAREN);
+				break; // sai do laço interno
+				
+			default:	//default do identifier
+				SyntacticError1(currentToken);
+				break;
+			}
+		default: // default do comando
+			SyntacticError1(currentToken);
 			break;
 		}
-			
 	}
 	
-	private void parseComandoComposto() throws IOException{
-		
-		if(currentToken.code==Token.BEGIN){
-			
-			while(currentToken.code==Token.IF|| currentToken.code==Token.WHILE || currentToken.code==Token.BEGIN || currentToken.code==Token.IDENTIFIER ||currentToken.code==Token.LPAREN){
-				parseComando();
-				if(currentToken.code==Token.SEMICOLON)
-					acceptIt();
-				else
-					erro();
-			}
-			
-			if(currentToken.code==Token.END)
-				acceptIt();
-			else
-				erro();
-			
+	private boolean compare(byte code) {
+		return (currentToken.code == code);
+	}
+	
+	private void parseComandoComposto(){
+		accept(Token.BEGIN);
+		while(compare(Token.IF) || compare(Token.BEGIN) || compare(Token.WHILE) || compare(Token.IDENTIFIER)) {
+			parseComando();
+			accept(Token.SEMICOLON);
 		}
-		else
-			erro();
-		
+		accept(Token.END);
 	}
     
-	private void parseCondicional() throws IOException{
-		
-		if(currentToken.code==Token.IF){
+	private void parseCondicional(){
+		accept(Token.IF);
+		parseExpressao();
+		accept(Token.THEN);
+		parseComando();
+		if(currentToken.code == Token.ELSE) {
 			acceptIt();
-			parseExpressao();
-			if(currentToken.code==Token.THEN){
-				acceptIt();
-				parseComando();
-				if(currentToken.code==Token.ELSE){
-					acceptIt();
-					parseComando();
-				}
-				
-			}
-			else
-				erro();
+			parseComando();
 		}
-		
-		else
-			erro();
 		
 	}
 	
-    private void parseCorpo() throws IOException{
+    private void parseCorpo(){
     	
-    	while(currentToken.code==Token.VAR || currentToken.code==Token.FUNCTION || currentToken.code==Token.PROCEDURE){
+    	while(compare(Token.VAR) || compare(Token.FUNCTION) || compare(Token.PROCEDURE)) {
     		parseDeclaracao();
-    		if(currentToken.code==Token.SEMICOLON)
-				acceptIt();
-			else
-				erro();
+    		accept(Token.SEMICOLON);
     	}
-    	
-    	if(currentToken.code==Token.BEGIN)
-			acceptIt();
-		else
-			erro();
-		
+    	parseComandoComposto();
 	}
     
-    private void parseDeclaracao() throws IOException{
+    private void parseDeclaracao(){
     	
     	switch(currentToken.code){
     		
@@ -180,318 +178,157 @@ public class Parser {
     		break;
     	
     	default:
-    		erro();
+    		SyntacticError1(currentToken);
     		break;
     	}
 	}
     
-    private void parseDeclaracaoDeFuncao() throws IOException{
+    private void parseDeclaracaoDeFuncao(){
+    	accept(Token.FUNCTION);
+    	parseIdentifier();
+    	accept(Token.LPAREN);
     	
-    	if(currentToken.code==Token.FUNCTION){
-    	    
-    		acceptIt();
-    		if(currentToken.code==Token.IDENTIFIER){
-    			
-    			acceptIt();
-    			if(currentToken.code==Token.LPAREN){
-    				
-    				acceptIt();
-    				if(currentToken.code==Token.VAR || currentToken.code==Token.IDENTIFIER){
-    					
-    					parseListaDeParametros();
-    				}
-    				if(currentToken.code==Token.RPAREN){
-    					
-        				acceptIt();
-        				if(currentToken.code==Token.COLON){
-        					
-            				acceptIt();
-            				if(currentToken.code==Token.INTEGER || currentToken.code==Token.REAL || currentToken.code==Token.BOOLEAN){
-            					
-            					parseTipoSimples();
-            					if(currentToken.code==Token.SEMICOLON){
-                					acceptIt();
-                					if(currentToken.code==Token.BEGIN || currentToken.code==Token.VAR || currentToken.code==Token.FUNCTION || currentToken.code==Token.PROCEDURE ){
-                    					
-                    					parseCorpo();
-                    				}
-                    				else
-                    					erro();             					
-                				}
-                				else
-                					erro();
-            				}
-            				else
-            					erro();
-        				}
-        				else
-        					erro();
-    				}
-    				else
-    					erro();
-    			}
-    			else
-            		erro();
-    		}
-    		else
-        		erro();
-    		   	     	
+    	if(compare(Token.VAR) || compare(Token.IDENTIFIER))
+    		parseListaDeParametros();
+    	
+    	accept(Token.RPAREN);
+    	accept(Token.COLON);
+    	parseTipoSimples();
+    	accept(Token.SEMICOLON);
+    	parseCorpo();
+	}
+    
+    private void parseDeclaracaoDeProcedimento() {
+ 
+    	accept(Token.PROCEDURE);
+    	parseIdentifier();
+    	accept(Token.LPAREN);
+    	
+    	if(compare(Token.VAR) || compare(Token.IDENTIFIER))
+    		parseListaDeParametros();
+    	
+    	accept(Token.RPAREN);
+    	accept(Token.SEMICOLON);
+    	parseCorpo();
+    	
+	}
+    
+    private void parseDeclaracaoDeVariavel(){
+    	
+    	accept(Token.VAR);
+    	parseListaDeIDs();
+    	accept(Token.COLON);
+    	parseTipo();
+		
+	}
+    
+    private void parseExpressao(){
+    	parseExpressaoSimples();
+    	if(compare(Token.OPREL)) {
+    		accept(Token.OPREL);
+    		parseExpressaoSimples();
     	}
-    	else
-    		erro();
-		
-	}
-    
-    private void parseDeclaracaoDeProcedimento() throws IOException{
     	
-    	if(currentToken.code==Token.PROCEDURE){
-    
-    		acceptIt();
-    		if(currentToken.code==Token.IDENTIFIER){
-    			
-    			acceptIt();
-    			if(currentToken.code==Token.LPAREN){
-    				
-    				acceptIt();
-    				if(currentToken.code==Token.VAR || currentToken.code==Token.IDENTIFIER){
-    					
-    					parseListaDeParametros();
-    				}
-    				if(currentToken.code==Token.RPAREN){
-    					
-        				acceptIt();
-        				if(currentToken.code==Token.SEMICOLON){
-        					
-            				acceptIt();
-            				if(currentToken.code==Token.BEGIN || currentToken.code==Token.VAR || currentToken.code==Token.FUNCTION || currentToken.code==Token.PROCEDURE ){
-            					
-            					parseCorpo();
-            				}
-            				else
-            					erro();
-        				}
-        				else
-        					erro();
-    				}
-    				else
-    					erro();
-    			}
-    			else
-            		erro();
-    		}
-    		else
-        		erro();
-    		   	     	
-    	}
-    	else
-    		erro();
-		
-	}
-    
-    private void parseDeclaracaoDeVariavel() throws IOException{
-    	
-    	if(currentToken.code==Token.VAR){
-			
-    		acceptIt();
-			parseListaDeIDs();
-			if(currentToken.code==Token.COLON){
-				
-				acceptIt();
-				parseTipo();
-			}
-			else
-				erro();
-		}
-		else
-			erro();
-		
-	}
-    
-    private void parseExpressao() throws IOException{
-    	
-    	if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
-			
-			parseTermo();
-			while(currentToken.code==Token.OPAD){
-				acceptIt();
-				parseTermo();
-			}
-			if(currentToken.code==Token.OPREL){
-				acceptIt();
-				parseTermo();
-				while(currentToken.code==Token.OPAD){
-					acceptIt();
-					parseTermo();
-				}
-			}
-			else
-				erro();
-			
-		}
-		else
-			erro();
-		
 	}   
-    
-    private void parseFator() throws IOException{
-		
-    	switch(currentToken.code){
-    		
-    		case Token.BOOLLIT: 
-    		case Token.INTLITERAL:
-    		case Token.FLOATLIT:
-    			acceptIt();
-    			break;
-    		
-    		case Token.LPAREN:
-    			
-    			acceptIt();
-    			if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
-    				
-    				parseExpressao();
-    				while(currentToken.code==Token.POINT){
-    					acceptIt();
-    					parseExpressao();
-    				}
-    			}
-    			
-    			if(currentToken.code==Token.RPAREN){
-    				acceptIt();
-    			}
-    			else
-    				erro();
-    			break;
-    		
-    		case Token.IDENTIFIER:
-    			
-    			acceptIt();
-    			while(currentToken.code==Token.LCOL){
-    				acceptIt();
-    				parseExpressao();
-    				if(currentToken.code==Token.RCOL)
-    				{
-    					acceptIt();
-    				}
-    				else
-    					erro();
-    			}
-    			break;
-    		
-    		default:
-    			erro();
-    			break;
-    		
-    	}
+
+	private void parseExpressaoSimples() {
+		parseTermo();
+		while(compare(Token.OPAD)) {
+			accept(Token.OPAD);
+			parseTermo();
+		}
 	}
-    
-    private void parseIterativo() throws IOException{
-		
-    	if(currentToken.code==Token.WHILE){
+
+	private void parseFator(){
+		switch(currentToken.code) {
+		case Token.BOOLLIT:case Token.INTLITERAL: case Token.FLOATLIT:
 			acceptIt();
-    		parseExpressao();
-    		if(currentToken.code==Token.DO){
-    			acceptIt();
-    			parseComando();
-    		}
-    		else
-    			erro();
+			break;
 			
+		case Token.LPAREN:
+			acceptIt();
+			parseExpressao();
+			accept(Token.RPAREN);
+			break;
+			
+		case Token.IDENTIFIER:
+			parseIdentifier();
+			switch(currentToken.code) {
+			case Token.LCOL:
+				while(compare(Token.LCOL)) {
+					acceptIt();
+					parseExpressao();
+					accept(Token.RCOL);
+				}
+				break;
+			case Token.LPAREN:
+				acceptIt();
+				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
+				parseListaDeExpressoes();
+				
+				accept(Token.RPAREN);
+				break;
+				
+			default:
+				SyntacticError1(currentToken);
+			}
+			
+			default:
+				SyntacticError1(currentToken);
 		}
-		else
-			erro();
+	}
+    
+    private void parseIterativo(){
+		accept(Token.WHILE);
+		parseExpressao();
+		accept(Token.DO);
+		parseComando();
 	}
     
     
-    private void parseListaDeExpressoes() throws IOException{
-		
-    	if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
-			
+    private void parseListaDeExpressoes(){
+		parseExpressao();
+		while(compare(Token.POINT)) {
+			acceptIt();
 			parseExpressao();
-			while(currentToken.code==Token.POINT){
-				acceptIt();
-				parseExpressao();
-			}
 		}
-    	else
-    		erro();
 	}
 	
-    private void parseListaDeIDs() throws IOException{
-		if(currentToken.code==Token.IDENTIFIER){
+    private void parseListaDeIDs(){
+		parseIdentifier();
+		while(compare(Token.POINT)) {
 			acceptIt();
-			while(currentToken.code==Token.POINT){
-				acceptIt();
-				if(currentToken.code==Token.IDENTIFIER){
-					acceptIt();
-				}
-				else
-					erro();
-			}
+			parseIdentifier();
 		}
-		else
-			erro();
+    	
 	}
     
-    private void parseListaDeParametros() throws IOException{
-    	
-    	if(currentToken.code==Token.VAR || currentToken.code==Token.IDENTIFIER){
-    		
-    		parseParametros();
-    		while(currentToken.code==Token.POINT){
-    			
-    			acceptIt();
-    			parseParametros();
-    		}
-    	}
-    	else
-    		erro();
-		
-	}
-    
-    private void parseParametros() throws IOException{
-		
-    	switch(currentToken.code){
-    	
-    	case Token.VAR:
+    private void parseListaDeParametros(){
+    	parseParametros();
+    	while(compare(Token.SEMICOLON)) {
     		acceptIt();
-    		parseListaDeIDs();
-    		if(currentToken.code==Token.COLON){
-    			acceptIt();
-    			parseTipoSimples();
-    		}
-    		else
-    			erro();
-    		break;
-    	case Token.IDENTIFIER:	
-    		parseListaDeIDs();
-    		if(currentToken.code==Token.COLON){
-    			acceptIt();
-    			parseTipoSimples();
-    		}
-    		else
-    			erro();
-    		break;
-    	
-    	default:
-    		erro();
-    		break;
+    		parseParametros();
     	}
+		
 	}
     
-    private void parseTermo() throws IOException{
-    	
-    	if(currentToken.code==Token.BOOLLIT || currentToken.code==Token.INTLITERAL || currentToken.code==Token.FLOATLIT || currentToken.code==Token.LPAREN ||currentToken.code==Token.IDENTIFIER){
+    private void parseParametros(){
+		if(compare(Token.VAR))
+			acceptIt();
+		parseListaDeIDs();
+		accept(Token.COLON);
+		parseTipoSimples();
+	}
+    
+    private void parseTermo(){
+    	parseFator();
+    	while(compare(Token.OPMUL)) {
+    		acceptIt();
     		parseFator();
-    		while(currentToken.code==Token.OPMUL){
-    			acceptIt();
-    			parseFator();
-    		}
     	}
-    	else
-    		erro();
 	}
     
-    private void parseTipo() throws IOException{
+    private void parseTipo(){
 		switch(currentToken.code){
 		
 		case Token.ARRAY:
@@ -505,57 +342,26 @@ public class Parser {
 			break;
 		
 		default:
-			erro();
+			SyntacticError1(currentToken);
 			break;
 		}
 	}
     
-    private void parseTipoAgregado() throws IOException{
-		
-    	if(currentToken.code==Token.ARRAY){
-    		acceptIt();
-    		if(currentToken.code==Token.LCOL){
-        		acceptIt();    		
-        		if(currentToken.code==Token.INTLITERAL){
-            		acceptIt();    		
-            		if(currentToken.code==Token.DOUBLEDOT){
-                		acceptIt();    		
-                		if(currentToken.code==Token.INTLITERAL){
-                    		acceptIt();    		
-                    		if(currentToken.code==Token.RCOL){
-                        		acceptIt();    		
-                        		if(currentToken.code==Token.OF){
-                            		acceptIt();    		
-                            		parseTipo();
-                            	}
-                            	else
-                            		erro();
-                        	}
-                        	else
-                        		erro();
-                    	}
-                    	else
-                    		erro();
-                	}
-                	else
-                		erro();
-            	}
-            	else
-            		erro();
-        	}
-        	else
-        		erro();
-    	}
-    	else
-    		erro();
+    private void parseTipoAgregado(){
+		accept(Token.ARRAY);
+		accept(Token.LCOL);
+		accept(Token.INTLITERAL);
+		accept(Token.DOUBLEDOT);
+		accept(Token.INTLITERAL);
+		accept(Token.OF);
+		parseTipo();
 	}
     
-    private void parseTipoSimples() throws IOException{
-		if(currentToken.code==Token.INTEGER || currentToken.code==Token.REAL || currentToken.code==Token.BOOLEAN){
+    private void parseTipoSimples(){
+		switch(currentToken.code) {
+		case Token.INTEGER: case Token.BOOLEAN: case Token.REAL:
 			acceptIt();
 		}
-		else
-			erro();
 	}
 
 }

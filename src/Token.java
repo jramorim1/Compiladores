@@ -68,7 +68,7 @@ PROCEDURE = 36,
 ERRO = 98,
 EOF = 99;
 
-private final static String[] SPELLINGS = {"IDENTIFIER","if","else","then","true","false","begin","end","function","var",
+public final static String[] SPELLINGS = {"IDENTIFIER","if","else","then","true","false","begin","end","function","var",
 		"while","do","or","and","program","array","of","integer","real","boolean","INTLITERAL","FLOATLIT","BOOLLIT","OPAD","OPMUL","OPREL",
 		";",":",":=",",",".","..","(", ")","[","]","procedure","ERRO","EOF"};
 
