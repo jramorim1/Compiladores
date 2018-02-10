@@ -9,7 +9,7 @@ public class Scanner {
 	private FileInputStream file;
 	private InputStreamReader openFile;
 	private PushbackReader reader;
-	private int line=0;
+	private int line=1;
 	private int column=0;
 	
 	private Character currentChar;
@@ -176,7 +176,7 @@ public class Scanner {
 	//consome os separadores
 private void scanSeparator() throws IOException{
 	switch(currentChar){
-	case ' ': case '\n': case '\r':
+	case ' ': case '\n': case '\r': case (char)9: //char 9 é o tab
 		if(compare('\n')){
 			line++;
 			column=0;
@@ -185,7 +185,7 @@ private void scanSeparator() throws IOException{
 		//takeIt();
 		break;
 	case '!':
-		while(isGraphic(currentChar))
+		while(isGraphic(currentChar) || compare((char)9))
 			currentChar=getChar();
 		break;
 	}
@@ -195,12 +195,12 @@ private void scanSeparator() throws IOException{
 public Token scan() throws IOException, EOFException{
 	
 	if(isNull())
-		return new Token(Token.EOF,"fim do arquivo",line,column);
+		return new Token(Token.EOF,"EOF",line,column);
 	
-	while(compare(' ')|| compare('\n') || compare('\r') || compare('!')){
+	while(compare(' ')|| compare('\n') || compare('\r') || compare('!') || compare((char)9)){
 		scanSeparator();
 		if(isNull())
-			return new Token(Token.EOF,"fim do arquivo",line,column);
+			return new Token(Token.EOF,"EOF",line,column);
 			
 	}
 	

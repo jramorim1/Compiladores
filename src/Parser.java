@@ -32,9 +32,15 @@ public class Parser {
 	public void parse() {
 		try {
 		currentToken = scanner.scan();
+		
+		if(compare(Token.EOF)) {
+				System.out.println("Erro: Nenhum texto foi encontrado!");
+				return;
+			}
+		
 		parsePrograma();
 		if(compare(Token.EOF)) {
-			System.out.println("Fim do arquivo");
+			System.out.println("Compilado!");
 		}
 		}catch(IOException e) {
 			System.out.println(e.getMessage());
@@ -81,7 +87,8 @@ public class Parser {
 			parseComandoComposto();
 			break;
 		
-		case Token.IDENTIFIER:	
+		case Token.IDENTIFIER:
+		{
 			parseIdentifier(); //reconhece o identificador
 			
 			/**para as regras de atribuição e chamada de procedimento
@@ -116,11 +123,11 @@ public class Parser {
 				
 				accept(Token.RPAREN);
 				break; // sai do laço interno
-				
-			default:	//default do identifier
-				SyntacticError1(currentToken);
-				break;
 			}
+			if(compare(Token.END) || compare(Token.ELSE) || compare(Token.SEMICOLON))
+				break;
+		}
+			
 		default: // default do comando
 			SyntacticError1(currentToken);
 			break;
@@ -239,7 +246,7 @@ public class Parser {
 		}
 	}
 
-	private void parseFator(){
+	private void parseFator(){ //regra em observação
 		switch(currentToken.code) {
 		case Token.BOOLLIT:case Token.INTLITERAL: case Token.FLOATLIT:
 			acceptIt();
@@ -252,6 +259,7 @@ public class Parser {
 			break;
 			
 		case Token.IDENTIFIER:
+		{
 			parseIdentifier();
 			switch(currentToken.code) {
 			case Token.LCOL:
@@ -268,11 +276,12 @@ public class Parser {
 				
 				accept(Token.RPAREN);
 				break;
-				
-			default:
-				SyntacticError1(currentToken);
 			}
-			
+			if(compare(Token.OPAD) || compare(Token.OPREL) || compare(Token.RPAREN) || compare(Token.THEN) || 
+					compare(Token.POINT) || compare(Token.DO) || compare(Token.RCOL) || compare(Token.END) || 
+					compare(Token.SEMICOLON)) // loockaheads
+				break;
+		}
 			default:
 				SyntacticError1(currentToken);
 		}

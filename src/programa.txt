@@ -1,4 +1,11 @@
-!auhauh ok
-ola
-1..5...
-AS
+program test;
+begin
+	if x > y then
+		begin
+			x := y;
+		end
+	else
+		begin
+			y:=x;
+	end;
+end.
