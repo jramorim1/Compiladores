@@ -1,11 +1,31 @@
+ 
+
 program test;
+
+var a, b, c: integer;
+var b, c, d: real;
+var x : boolean;
+
+function f() : integer;
 begin
-	if x > y then
+x:=b;
+end;
+
+begin
+	if (a or b)  then
 		begin
 			x := y;
 		end
 	else
 		begin
 			y:=x;
+			x:=y;
+			while (x < y)
+			do
+			x:=a;
+			f();
 	end;
+begin
+end;
+
 end.

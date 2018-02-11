@@ -21,8 +21,9 @@ public class Parser {
 		try {
 		if(currentToken.code == ExpectedKind) {
 			currentToken = this.scanner.scan();
-		}else
+		}else {
 			SyntacticError1(currentToken);
+		}
 		
 		}catch(IOException e) {
 			System.out.println(e.getMessage());
@@ -124,7 +125,7 @@ public class Parser {
 				accept(Token.RPAREN);
 				break; // sai do laço interno
 			}
-			if(compare(Token.END) || compare(Token.ELSE) || compare(Token.SEMICOLON))
+//			if(compare(Token.END) || compare(Token.ELSE) || compare(Token.SEMICOLON))
 				break;
 		}
 			
@@ -277,10 +278,11 @@ public class Parser {
 				accept(Token.RPAREN);
 				break;
 			}
-			if(compare(Token.OPAD) || compare(Token.OPREL) || compare(Token.RPAREN) || compare(Token.THEN) || 
-					compare(Token.POINT) || compare(Token.DO) || compare(Token.RCOL) || compare(Token.END) || 
-					compare(Token.SEMICOLON)) // loockaheads
-				break;
+			break;
+//			if(compare(Token.OPAD) || compare(Token.OPREL) || compare(Token.RPAREN) || compare(Token.THEN) || 
+//					compare(Token.POINT) || compare(Token.DO) || compare(Token.RCOL) || compare(Token.END) || 
+//					compare(Token.SEMICOLON)) // loockaheads
+//				break;
 		}
 			default:
 				SyntacticError1(currentToken);

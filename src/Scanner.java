@@ -16,18 +16,24 @@ public class Scanner {
 	private byte currentCode;
 	private StringBuffer currentSpelling;
 	
-	public Scanner(String path) throws IOException {
+	public Scanner(String path){
+		try {
 		this.file = new FileInputStream(path);
 		this.openFile = new InputStreamReader(this.file);
 		this.reader = new PushbackReader(this.openFile);
 		this.currentChar = getChar();
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	//metodo que retorna o proximo char do buffer
 	//se for EOF retorna null
 	public Character getChar() throws IOException{
+		
 		Character c = null;
 		int i = (int)this.reader.read();
+		
 		if(i != -1) 
 			c = (char)i;
 			column++;
@@ -192,8 +198,8 @@ private void scanSeparator() throws IOException{
 	//falta implementar o comentario com // ou /*
 }
 //metodo que retorna um token do buffer
-public Token scan() throws IOException, EOFException{
-	
+public Token scan() throws IOException{
+		
 	if(isNull())
 		return new Token(Token.EOF,"EOF",line,column);
 	
@@ -208,6 +214,7 @@ public Token scan() throws IOException, EOFException{
 	currentCode = scanToken();
 	
 	return new Token(currentCode,currentSpelling.toString(),line,column-currentSpelling.toString().length());
+	
 }
 	
 //metodo que aceita um char condicional
