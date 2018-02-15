@@ -1,3 +1,4 @@
+package analizadores;
 
 import java.io.EOFException;
 import java.io.FileInputStream;

@@ -1,3 +1,5 @@
+package analizadores;
+
 import java.io.IOException;
 
 public class Parser {
