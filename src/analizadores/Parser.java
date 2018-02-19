@@ -366,6 +366,7 @@ public class Parser {
 		accept(Token.INTLITERAL);
 		accept(Token.DOUBLEDOT);
 		accept(Token.INTLITERAL);
+		accept(Token.RCOL);
 		accept(Token.OF);
 		parseTipo();
 	}
