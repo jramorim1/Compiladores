@@ -1,6 +1,7 @@
 package analizadores;
 
 import java.io.IOException;
+import AST.*;
 
 public class Parser {
 	
@@ -63,19 +64,39 @@ public class Parser {
 		
 	}
 	
-	private void parsePrograma(){
+	private nodePrograma parsePrograma(){
+			nodePrograma p = new nodePrograma();
+			
 			accept(Token.PROGRAM);
 			parseIdentifier();
 			accept(Token.SEMICOLON);
 			parseCorpo();
 			accept(Token.DOT);
+			
+			return p;
 	}
 	
-	private void parseIdentifier(){
-		accept(Token.IDENTIFIER);
+	private nodeIdentificador parseIdentifier(){
+		nodeIdentificador id = new nodeIdentificador();
+
+		try {
+			if(currentToken.code == Token.IDENTIFIER) {
+				currentToken = this.scanner.scan();
+				id.spelling = currentToken.spelling;
+				return id;
+			}else {
+				SyntacticError1(currentToken);
+			}
+			
+			}catch(IOException e) {
+				System.out.println(e.getMessage());
+			}
+		return null;
+		
+		
 	}
 
-	private void parseComando(){
+	private nodeComando parseComando(){
 		
 		switch(currentToken.code){
 		case Token.IF:	//para a regra de condição, first if
