@@ -6,6 +6,10 @@ public byte code;
 public String spelling;
 public int linha,coluna;
 
+public Token() {
+	
+}
+
 public Token(byte codigo, String spell, int linha, int coluna){
 	this.code = codigo;
 	this.spelling = spell;

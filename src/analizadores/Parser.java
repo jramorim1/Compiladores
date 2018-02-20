@@ -375,6 +375,11 @@ public class Parser {
 		switch(currentToken.code) {
 		case Token.INTEGER: case Token.BOOLEAN: case Token.REAL:
 			acceptIt();
+		break;
+		
+		default:
+			SyntacticError1(currentToken);
+			break;
 		}
 	}
 
