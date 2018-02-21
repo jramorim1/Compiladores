@@ -240,6 +240,7 @@ private void takeIt() throws IOException{
 
 //metodo que verifica se é digito
 private boolean isDigit(Character c){
+	
 	if(c == null)
 		return false;
 	int valorAsc2 = (int)c;

@@ -86,10 +86,10 @@ public class Parser {
 			}else {
 				SyntacticError1(currentToken);
 			}
-			
-			}catch(IOException e) {
-				System.out.println(e.getMessage());
-			}
+
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
+		}
 		return id;
 	}
 
@@ -160,6 +160,10 @@ public class Parser {
 				callProced.lista = listaE;
 				comando = callProced;
 				break; // sai do laço interno
+				
+				default:
+					SyntacticError1(currentToken);
+					break;
 			}
 				break;
 		}
@@ -231,7 +235,7 @@ public class Parser {
 	}
     
     private nodeDeclaracao parseDeclaracao(){
-    	nodeDeclaracao decAST;
+    	nodeDeclaracao decAST = null;
     	switch(currentToken.code){
     		
     	case Token.VAR:
@@ -347,98 +351,140 @@ public class Parser {
 		}
 		return last;
 	}
-
-	private void parseFator(){ //regra em observação
+	
+	private nodeLiteral parseLiteral() {
+		nodeLiteral litAST = null;
+    	try {
+    		litAST = new nodeLiteral();
+    		litAST.spelling = currentToken.spelling;
+    		currentToken = this.scanner.scan();
+    		
+    	}catch(IOException e) {
+    		System.out.println(e.getMessage());
+    	}
+    	return litAST;
+	}
+	
+	private nodeExpressao parseFator(){
+		
+		nodeExpressao ex = null;
 		switch(currentToken.code) {
 		case Token.BOOLLIT:case Token.INTLITERAL: case Token.FLOATLIT:
-			acceptIt();
+			//acceptIt();
+			nodeEn e = new nodeEn(parseLiteral());
+			ex = e;
 			break;
 			
 		case Token.LPAREN:
 			acceptIt();
-			parseExpressao();
+			ex = parseExpressao();
 			accept(Token.RPAREN);
 			break;
 			
 		case Token.IDENTIFIER:
 		{
-			parseIdentifier();
+			nodeIdentificador id = parseIdentifier();
+			
 			switch(currentToken.code) {
 			case Token.LCOL:
+				nodeExpressao first = null;
 				while(compare(Token.LCOL)) {
 					acceptIt();
-					parseExpressao();
+					sequencialExpressao current = new sequencialExpressao(first, parseExpressao());
+					first = current;
 					accept(Token.RCOL);
 				}
+				//criar construtor para esta bagunça
+				nodeVariavel var = new nodeVariavel();
+				var.id = id;
+				var.exp = first;
+				nodeFatorVar v = new nodeFatorVar();
+				v.var = var;
+				ex = v;
 				break;
+				
 			case Token.LPAREN:
 				acceptIt();
 				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
-				parseListaDeExpressoes();
-				
+				ex = parseListaDeExpressoes();
 				accept(Token.RPAREN);
 				break;
+				
+				default:
+					SyntacticError1(currentToken);
+					return null;
 			}
 			break;
-//			if(compare(Token.OPAD) || compare(Token.OPREL) || compare(Token.RPAREN) || compare(Token.THEN) || 
-//					compare(Token.POINT) || compare(Token.DO) || compare(Token.RCOL) || compare(Token.END) || 
-//					compare(Token.SEMICOLON)) // loockaheads
-//				break;
 		}
 			default:
 				SyntacticError1(currentToken);
+				return null;
 		}
+		return ex;
 	}
     
-    private void parseIterativo(){
+    private nodeComando parseIterativo(){
+    	nodeWhileComando whileAST = new nodeWhileComando();
 		accept(Token.WHILE);
-		parseExpressao();
+		whileAST.expressao = parseExpressao();
 		accept(Token.DO);
-		parseComando();
+		whileAST.comando = parseComando();
+		
+		return whileAST;
 	}
     
     
-    private void parseListaDeExpressoes(){
-		parseExpressao();
+    private nodeExpressao parseListaDeExpressoes(){
+    	nodeExpressao last;
+		last = parseExpressao();
 		while(compare(Token.POINT)) {
 			acceptIt();
-			parseExpressao();
+			sequencialExpressao current = new sequencialExpressao(last, parseExpressao());
+			last = current;
 		}
+		return last;
 	}
 	
-    private void parseListaDeIDs(){
-		parseIdentifier();
+    private nodeIdentificador parseListaDeIDs(){
+    	nodeIdentificador last;
+		last = parseIdentifier();
 		while(compare(Token.POINT)) {
 			acceptIt();
-			parseIdentifier();
+			sequencialIdentificador current = new sequencialIdentificador(last, parseIdentifier());
+			last = current;
 		}
-    	
+		return last;
 	}
     
-    private void parseListaDeParametros(){
-    	parseParametros();
+    private nodeParametro parseListaDeParametros(){
+    	nodeParametro last;
+    	last = parseParametros();
     	while(compare(Token.SEMICOLON)) {
     		acceptIt();
-    		parseParametros();
+    		sequencialParametro current = new sequencialParametro(last,parseParametros());
+    		last = current;
     	}
-		
+		return last;
 	}
     
-    private void parseParametros(){
+    private nodeParametro parseParametros(){
+    	nodeParametro p = new nodeParametro();	
 		if(compare(Token.VAR))
 			acceptIt();
-		parseListaDeIDs();
+		p.lista = parseListaDeIDs();
 		accept(Token.COLON);
-		parseTipoSimples();
+		p.tipo = parseTipoSimples();
+		return p;
 	}
     
     private nodeExpressao parseTermo(){
-    	
-    	parseFator();
+    	nodeExpressao e = parseFator();
     	while(compare(Token.OPMUL)) {
-    		acceptIt();
-    		parseFator();
+    		//acceptIt();
+    		nodeEo current = new nodeEo(e, parseOperator(),parseFator());
+    		e = current;
     	}
+    	return e;
 	}
     
     private void parseTipo(){

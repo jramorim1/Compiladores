@@ -2,6 +2,6 @@ package AST;
 import analizadores.*;
 
 public class nodeParametro {
-public Token lista;
+public nodeIdentificador lista;
 public nodeTipo tipo;
 }

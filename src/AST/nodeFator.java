@@ -1,5 +1,5 @@
 package AST;
 
-public abstract class nodeFator {
+public abstract class nodeFator extends nodeExpressao{
 
 }
