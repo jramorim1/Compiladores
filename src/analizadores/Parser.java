@@ -68,22 +68,21 @@ public class Parser {
 			nodePrograma p = new nodePrograma();
 			
 			accept(Token.PROGRAM);
-			parseIdentifier();
+			p.id = parseIdentifier();
 			accept(Token.SEMICOLON);
-			parseCorpo();
+			p.corpo = parseCorpo();
 			accept(Token.DOT);
 			
 			return p;
 	}
 	
 	private nodeIdentificador parseIdentifier(){
-		nodeIdentificador id = new nodeIdentificador();
-
+		nodeIdentificador id = null;
 		try {
 			if(currentToken.code == Token.IDENTIFIER) {
-				currentToken = this.scanner.scan();
+				id = new nodeIdentificador();
 				id.spelling = currentToken.spelling;
-				return id;
+				currentToken = this.scanner.scan();
 			}else {
 				SyntacticError1(currentToken);
 			}
@@ -91,64 +90,77 @@ public class Parser {
 			}catch(IOException e) {
 				System.out.println(e.getMessage());
 			}
-		return null;
-		
-		
+		return id;
 	}
 
-	private nodeComando parseComando(){
+	private nodeComando parseComando(){ //verificar para uma entrada só com id
+		nodeComando comando = null;
 		
 		switch(currentToken.code){
 		case Token.IF:	//para a regra de condição, first if
-			parseCondicional();
+			//comando = parseCondicional();
 			break;
 		
 		case Token.WHILE:	// para a regra de iteraçao, first while
-			parseIterativo();
+			//comando = parseIterativo();
 			break;
 		
 		case Token.BEGIN:	//para a regra de begin, first begin
-			parseComandoComposto();
+			//comando = parseComandoComposto();
 			break;
 		
 		case Token.IDENTIFIER:
 		{
-			parseIdentifier(); //reconhece o identificador
-			
-			/**para as regras de atribuição e chamada de procedimento
-			 * fazendo a fatoração das duas regras, first externo é id
-			 * apos isso é verificado as regras 
-			 * [expressao]* := expressao
-			 * (lista de expressao | vazio) 
-			 * 
-			 * como os firsts dessas regras internas são disjuntos
-			 * podemos aplicar o algoritmo
-			 * */
-			
+			nodeIdentificador id = parseIdentifier(); //reconhece o identificador
 			switch(currentToken.code) {  //faz um switch interno para verificar as proximas regras
 		
-		case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*" 
+		case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*"
+			nodeAtribComando atribAST = new nodeAtribComando();
+			
+			listaExpressao first,last,d;
+			first = null;
+			last = null;
 			while(currentToken.code == Token.RCOL) {
 				acceptIt();
-				parseExpressao();
+				d = new listaExpressao(); 
+				d.exp = parseExpressao();
+				d.next = null;
 				accept(Token.RCOL);
+				if(first == null)
+					first = d;
+				else
+					last.next = d;
+				last=d;
 			}
+			//criando o ponteiro para a variavel
+			nodeVariavel var = new nodeVariavel();
+			var.id = id;
+			var.exp = first;
+			
 			case Token.BECOMES:	//se nao foi o [ mas foi o := , entao pega := expressao
 				acceptIt();
-				parseExpressao();
+				nodeExpressao eAST = parseExpressao();
+				
+				atribAST.var = var;
+				atribAST.expressao = eAST;
+				comando = atribAST;
 				break;	//sai do laço interno
 				
 				
-			case Token.LPAREN: // "(" (<lista-de-expressões> | <vazio>) ")"	 OBS first lista={bool, int, float, lparen}
+			case Token.LPAREN: // "(" (<lista-de-expressões> | <vazio>) ")"
+				nodePComando callProced = new nodePComando();
+				nodeExpressao listaE;
+				
 				acceptIt();
-				
-				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
-					parseListaDeExpressoes();
-				
+				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER)) {
+				listaE = parseListaDeExpressoes();
+				}
 				accept(Token.RPAREN);
+				callProced.id = id;
+				callProced.lista = listaE;
+				comando = callProced;
 				break; // sai do laço interno
 			}
-//			if(compare(Token.END) || compare(Token.ELSE) || compare(Token.SEMICOLON))
 				break;
 		}
 			
@@ -156,118 +168,184 @@ public class Parser {
 			SyntacticError1(currentToken);
 			break;
 		}
+		return comando;
 	}
 	
 	private boolean compare(byte code) {
 		return (currentToken.code == code);
 	}
 	
-	private void parseComandoComposto(){
+	private nodeComando parseComandoComposto(){
+		nodeComando c1;
+		sequencialComando lista = null;
+		
 		accept(Token.BEGIN);
 		while(compare(Token.IF) || compare(Token.BEGIN) || compare(Token.WHILE) || compare(Token.IDENTIFIER)) {
-			parseComando();
+			sequencialComando current = new sequencialComando(lista, parseComando());
+			lista = current;
 			accept(Token.SEMICOLON);
 		}
 		accept(Token.END);
+		c1 = lista;
+		return c1;
 	}
     
-	private void parseCondicional(){
+	private nodeComando parseCondicional(){
+		nodeComando c1 = null;
+		nodeIfComando condicional;
+		nodeExpressao ifExp =null;
+		nodeComando ifCom=null;
+		nodeComando elseCom=null;
+		
 		accept(Token.IF);
-		parseExpressao();
+		ifExp = parseExpressao();
 		accept(Token.THEN);
-		parseComando();
+		ifCom = parseComando();
+		
+		condicional = new nodeIfComando();
+		condicional.expressao = ifExp;
+		condicional.comandoIf = ifCom;
+		condicional.comandoElse = null;
+		
 		if(currentToken.code == Token.ELSE) {
 			acceptIt();
-			parseComando();
+			elseCom = parseComando();
+			condicional.comandoElse = elseCom;
 		}
-		
+		c1 = condicional;
+		return c1;
 	}
 	
-    private void parseCorpo(){
-    	
+    private nodeCorpo parseCorpo(){
+    	nodeCorpo corpo = new nodeCorpo();
+    	nodeDeclaracao lista = null;
     	while(compare(Token.VAR) || compare(Token.FUNCTION) || compare(Token.PROCEDURE)) {
-    		parseDeclaracao();
+    		sequencialDeclaration current = new sequencialDeclaration(lista, parseDeclaracao());
+    		lista = current;
     		accept(Token.SEMICOLON);
     	}
-    	parseComandoComposto();
+    	nodeComando comAST = parseComandoComposto();
+    	corpo.comandos = comAST;
+    	corpo.declarations = lista;
+    	return corpo;
 	}
     
-    private void parseDeclaracao(){
-    	
+    private nodeDeclaracao parseDeclaracao(){
+    	nodeDeclaracao decAST;
     	switch(currentToken.code){
     		
     	case Token.VAR:
-    		parseDeclaracaoDeVariavel();
+    		decAST = parseDeclaracaoDeVariavel();
     		break;
     	
     	case Token.FUNCTION:
-    		parseDeclaracaoDeFuncao();
+    		decAST = parseDeclaracaoDeFuncao();
     		break;
     	
     	case Token.PROCEDURE:
-    		parseDeclaracaoDeProcedimento();
+    		decAST = parseDeclaracaoDeProcedimento();
     		break;
     	
     	default:
     		SyntacticError1(currentToken);
     		break;
     	}
+    	return decAST;
 	}
     
-    private void parseDeclaracaoDeFuncao(){
+    private nodeDeclaracao parseDeclaracaoDeFuncao(){
+    	nodeDecFuncao dfuncAST = new nodeDecFuncao();
+    	
     	accept(Token.FUNCTION);
-    	parseIdentifier();
+    	nodeIdentificador id = parseIdentifier();
     	accept(Token.LPAREN);
     	
+    	nodeParametro p = null;
     	if(compare(Token.VAR) || compare(Token.IDENTIFIER))
-    		parseListaDeParametros();
+    		p = parseListaDeParametros();
     	
     	accept(Token.RPAREN);
     	accept(Token.COLON);
-    	parseTipoSimples();
+    	nodeTipo tipo = parseTipoSimples();
     	accept(Token.SEMICOLON);
-    	parseCorpo();
+    	nodeCorpo corpo = parseCorpo();
+    	
+    	dfuncAST.id = id;
+    	dfuncAST.lista = p;
+    	dfuncAST.tipo = tipo;
+    	dfuncAST.corpo = corpo;
+    	
 	}
     
-    private void parseDeclaracaoDeProcedimento() {
- 
+    private nodeDeclaracao parseDeclaracaoDeProcedimento() {
+    	nodeDecProcedimento procedAST = new nodeDecProcedimento();
+    	
     	accept(Token.PROCEDURE);
-    	parseIdentifier();
+    	nodeIdentificador id = parseIdentifier();
     	accept(Token.LPAREN);
     	
+    	nodeParametro p = null;
     	if(compare(Token.VAR) || compare(Token.IDENTIFIER))
-    		parseListaDeParametros();
+    		p = parseListaDeParametros();
     	
     	accept(Token.RPAREN);
     	accept(Token.SEMICOLON);
-    	parseCorpo();
+    	nodeCorpo corpo = parseCorpo();
+    	
+    	procedAST.id = id;
+    	procedAST.lista = p;
+    	procedAST.corpo = corpo;
+    	
+    	return procedAST;
     	
 	}
     
-    private void parseDeclaracaoDeVariavel(){
+    private nodeDeclaracao parseDeclaracaoDeVariavel(){
+    	nodeDecVariavel dVarAST = new nodeDecVariavel();
     	
     	accept(Token.VAR);
-    	parseListaDeIDs();
+    	dVarAST.lista = parseListaDeIDs();
     	accept(Token.COLON);
-    	parseTipo();
+    	dVarAST.tipo = parseTipo();
+    	
+    	return dVarAST;
 		
 	}
     
-    private void parseExpressao(){
-    	parseExpressaoSimples();
+    private nodeExpressao parseExpressao(){
+    	nodeExpressao left = parseExpressaoSimples();
     	if(compare(Token.OPREL)) {
-    		accept(Token.OPREL);
-    		parseExpressaoSimples();
+    		//accept(Token.OPREL);
+    		nodeEo current = new nodeEo(left,parseOperator(),parseExpressaoSimples());
+    		left = current;
     	}
-    	
+    	return left;
 	}   
+    
+    private nodeOperator parseOperator() {
+    	nodeOperator opAST = null;
+    	try {
+    	if(compare(Token.OPAD) || compare(Token.OPMUL) || compare(Token.OPREL)) {
+    		opAST = new nodeOperator(currentToken);
+    		currentToken = this.scanner.scan();
+    	}else {
+    		SyntacticError1(currentToken);
+    	}
+    	}catch(IOException e) {
+    		System.out.println(e.getMessage());
+    	}
+    	return opAST;
+    }
 
-	private void parseExpressaoSimples() {
-		parseTermo();
+	private nodeExpressao parseExpressaoSimples() {
+		
+		nodeExpressao last = parseTermo();
 		while(compare(Token.OPAD)) {
-			accept(Token.OPAD);
-			parseTermo();
+			//accept(Token.OPAD);
+			nodeEo current = new nodeEo(last,parseOperator(),parseTermo());
+			last = current;
 		}
+		return last;
 	}
 
 	private void parseFator(){ //regra em observação
@@ -354,7 +432,8 @@ public class Parser {
 		parseTipoSimples();
 	}
     
-    private void parseTermo(){
+    private nodeExpressao parseTermo(){
+    	
     	parseFator();
     	while(compare(Token.OPMUL)) {
     		acceptIt();

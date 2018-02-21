@@ -1,10 +1,7 @@
 package AST;
 
-import analizadores.*;
-
-
 public class nodePrograma {
-	public Token id;
+	public nodeIdentificador id;
 	public nodeCorpo corpo;
 
 }
