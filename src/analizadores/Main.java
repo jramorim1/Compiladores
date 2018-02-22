@@ -7,7 +7,7 @@ public class Main {
 	public static void main(String[] args){
 		// TODO Auto-generated method stub
 		try{
-		String path = "D:\\teste.txt";	
+		String path = "C:\\Users\\oieus\\git\\Compiladores\\src\\analizadores\\programa.txt";	
 		Parser parser = new Parser(path);
 		parser.parse();
 	

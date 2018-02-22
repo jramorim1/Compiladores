@@ -41,8 +41,9 @@ public class Parser {
 				System.out.println("Erro: Nenhum texto foi encontrado!");
 				return;
 			}
+		nodePrograma p;
+		p = parsePrograma();
 		
-		parsePrograma();
 		if(compare(Token.EOF)) {
 			System.out.println("Compilado!");
 		}
@@ -98,24 +99,26 @@ public class Parser {
 		
 		switch(currentToken.code){
 		case Token.IF:	//para a regra de condição, first if
-			//comando = parseCondicional();
+			comando = parseCondicional();
 			break;
 		
 		case Token.WHILE:	// para a regra de iteraçao, first while
-			//comando = parseIterativo();
+			comando = parseIterativo();
 			break;
 		
 		case Token.BEGIN:	//para a regra de begin, first begin
-			//comando = parseComandoComposto();
+			comando = parseComandoComposto();
 			break;
 		
 		case Token.IDENTIFIER:
 		{
-			nodeIdentificador id = parseIdentifier(); //reconhece o identificador
-			switch(currentToken.code) {  //faz um switch interno para verificar as proximas regras
-		
+			nodeIdentificador id = parseIdentifier();
+			nodeVariavel var = null;
+			nodeAtribComando atribAST = null;
+			
+			switch(currentToken.code) {  
+			
 		case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*"
-			nodeAtribComando atribAST = new nodeAtribComando();
 			
 			listaExpressao first,last,d;
 			first = null;
@@ -133,13 +136,14 @@ public class Parser {
 				last=d;
 			}
 			//criando o ponteiro para a variavel
-			nodeVariavel var = new nodeVariavel();
+			var = new nodeVariavel();
 			var.id = id;
 			var.exp = first;
 			
 			case Token.BECOMES:	//se nao foi o [ mas foi o := , entao pega := expressao
 				acceptIt();
 				nodeExpressao eAST = parseExpressao();
+				atribAST = new nodeAtribComando();
 				
 				atribAST.var = var;
 				atribAST.expressao = eAST;
@@ -149,7 +153,7 @@ public class Parser {
 				
 			case Token.LPAREN: // "(" (<lista-de-expressões> | <vazio>) ")"
 				nodePComando callProced = new nodePComando();
-				nodeExpressao listaE;
+				nodeExpressao listaE = null;
 				
 				acceptIt();
 				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER)) {
@@ -278,6 +282,7 @@ public class Parser {
     	dfuncAST.lista = p;
     	dfuncAST.tipo = tipo;
     	dfuncAST.corpo = corpo;
+    	return dfuncAST;
     	
 	}
     
@@ -487,46 +492,57 @@ public class Parser {
     	return e;
 	}
     
-    private void parseTipo(){
+    private nodeTipo parseTipo(){
+    	nodeTipo tipo = null;
 		switch(currentToken.code){
-		
 		case Token.ARRAY:
-			parseTipoAgregado();
+			tipo = parseTipoAgregado();
 			break;
 		
 		case Token.INTEGER:
 		case Token.REAL:
 		case Token.BOOLEAN:
-			parseTipoSimples();
+			tipo = parseTipoSimples();
 			break;
 		
 		default:
 			SyntacticError1(currentToken);
 			break;
 		}
+		return tipo;
 	}
     
-    private void parseTipoAgregado(){
+    private nodeTipo parseTipoAgregado(){
+    	nodeTipoAgregado t = new nodeTipoAgregado();
 		accept(Token.ARRAY);
 		accept(Token.LCOL);
-		accept(Token.INTLITERAL);
+		t.intLeft = parseLiteral();
 		accept(Token.DOUBLEDOT);
-		accept(Token.INTLITERAL);
+		t.intRight = parseLiteral();
 		accept(Token.RCOL);
 		accept(Token.OF);
-		parseTipo();
+		t.tipo = parseTipo();
+		
+		return t;
 	}
     
-    private void parseTipoSimples(){
+    private nodeTipo parseTipoSimples(){
+    	nodeTipoSimples t = new nodeTipoSimples();
 		switch(currentToken.code) {
 		case Token.INTEGER: case Token.BOOLEAN: case Token.REAL:
-			acceptIt();
+			try {
+			t.tipo = currentToken.code;
+			currentToken = this.scanner.scan();
+			}catch(IOException e){
+				System.out.println(e.getMessage());
+			}
 		break;
 		
 		default:
 			SyntacticError1(currentToken);
 			break;
 		}
+		return t;
 	}
 
 }
