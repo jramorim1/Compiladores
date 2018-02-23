@@ -391,7 +391,7 @@ public class Parser {
 			nodeIdentificador id = parseIdentifier();
 			
 			switch(currentToken.code) {
-			case Token.LCOL:
+			case Token.LCOL: //espera um colchete para o seletor
 				nodeExpressao first = null;
 				while(compare(Token.LCOL)) {
 					acceptIt();
@@ -414,10 +414,6 @@ public class Parser {
 				ex = parseListaDeExpressoes();
 				accept(Token.RPAREN);
 				break;
-				
-				default:
-					SyntacticError1(currentToken);
-					return null;
 			}
 			break;
 		}
