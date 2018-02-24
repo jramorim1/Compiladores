@@ -8,4 +8,9 @@ public class nodeIdentificador extends Token {
 	public nodeIdentificador() {
 		
 	}
+	
+	public void visit (Visitor v){
+		 v.visitIdentificador(this);
+		 }
+
 }

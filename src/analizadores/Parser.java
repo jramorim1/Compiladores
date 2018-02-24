@@ -33,23 +33,27 @@ public class Parser {
 		}
 	}
 	
-	public void parse() {
+	public nodePrograma parse() {
+		nodePrograma p = null;
 		try {
 		currentToken = scanner.scan();
 		
 		if(compare(Token.EOF)) {
 				System.out.println("Erro: Nenhum texto foi encontrado!");
-				return;
+				return null;
 			}
-		nodePrograma p;
+		
 		p = parsePrograma();
 		
 		if(compare(Token.EOF)) {
 			System.out.println("Compilado!");
 		}
+		return p;
+		
 		}catch(IOException e) {
 			System.out.println(e.getMessage());
 		}
+		return p;
 	}
 	
 	private void LexicError(Token t) {
@@ -113,42 +117,32 @@ public class Parser {
 		case Token.IDENTIFIER:
 		{
 			nodeIdentificador id = parseIdentifier();
-			nodeVariavel var = null;
-			nodeAtribComando atribAST = null;
+			nodeVariavel var = new nodeVariavel();
+			nodeAtribComando atribAST = new nodeAtribComando();
+			var.id = id;
 			
 			switch(currentToken.code) {  
 			
-		case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*"
-			
-			listaExpressao first,last,d;
-			first = null;
-			last = null;
-			while(currentToken.code == Token.RCOL) {
-				acceptIt();
-				d = new listaExpressao(); 
-				d.exp = parseExpressao();
-				d.next = null;
-				accept(Token.RCOL);
-				if(first == null)
-					first = d;
-				else
-					last.next = d;
-				last=d;
-			}
-			//criando o ponteiro para a variavel
-			var = new nodeVariavel();
-			var.id = id;
-			var.exp = first;
-			
+			case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*"
+
+				nodeExpressao e = null;
+				while(currentToken.code == Token.RCOL) {
+					acceptIt();
+					sequencialExpressao current = new sequencialExpressao(e, parseExpressao());
+					e = current;
+					accept(Token.RCOL);
+				}
+				//criando o ponteiro para a variavel
+				var.exp = e;
+
 			case Token.BECOMES:	//se nao foi o [ mas foi o := , entao pega := expressao
+				atribAST.var = var;
 				acceptIt();
 				nodeExpressao eAST = parseExpressao();
-				atribAST = new nodeAtribComando();
-				
-				atribAST.var = var;
 				atribAST.expressao = eAST;
 				comando = atribAST;
-				break;	//sai do laço interno
+				return comando;
+				//sai do laço interno
 				
 				
 			case Token.LPAREN: // "(" (<lista-de-expressões> | <vazio>) ")"
@@ -389,7 +383,9 @@ public class Parser {
 		case Token.IDENTIFIER:
 		{
 			nodeIdentificador id = parseIdentifier();
-			
+			nodeVariavel var = new nodeVariavel();
+			nodeFatorVar v = new nodeFatorVar();
+			var.id = id;
 			switch(currentToken.code) {
 			case Token.LCOL: //espera um colchete para o seletor
 				nodeExpressao first = null;
@@ -400,10 +396,7 @@ public class Parser {
 					accept(Token.RCOL);
 				}
 				//criar construtor para esta bagunça
-				nodeVariavel var = new nodeVariavel();
-				var.id = id;
 				var.exp = first;
-				nodeFatorVar v = new nodeFatorVar();
 				v.var = var;
 				ex = v;
 				break;
@@ -413,6 +406,11 @@ public class Parser {
 				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
 				ex = parseListaDeExpressoes();
 				accept(Token.RPAREN);
+				break;
+				
+			case Token.SEMICOLON:
+				v.var = var;
+				v.var.exp = null;
 				break;
 			}
 			break;

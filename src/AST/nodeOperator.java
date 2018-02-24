@@ -6,4 +6,9 @@ public class nodeOperator extends Token{
  public nodeOperator(Token ct) {
 	 this.op = ct;
  }
+ 
+ public void visit (Visitor v){
+	 v.visitOperator(this);
+	 }
+
 }

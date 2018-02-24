@@ -10,4 +10,9 @@ public nodeTermo(nodeFator f1, nodeFator f2, nodeOperator op) {
 	this.op = op;
 	
 }
+
+public void visit (Visitor v){
+	 v.visitTermo(this);
+	 }
+
 }
