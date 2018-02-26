@@ -141,7 +141,7 @@ public class Parser {
 				nodeExpressao eAST = parseExpressao();
 				atribAST.expressao = eAST;
 				comando = atribAST;
-				return comando;
+				break;
 				//sai do laço interno
 				
 				
@@ -402,15 +402,23 @@ public class Parser {
 				break;
 				
 			case Token.LPAREN:
+				nodeExpressao current = null;
 				acceptIt();
 				if(compare(Token.BOOLLIT) || compare(Token.INTLITERAL) || compare(Token.FLOATLIT) || compare(Token.LPAREN) || compare(Token.IDENTIFIER))
-				ex = parseListaDeExpressoes();
+				current = parseListaDeExpressoes();
 				accept(Token.RPAREN);
+				
+				nodeFatorFunc f = new nodeFatorFunc();
+				f.id = id;
+				f.lista = current;
+				
+				ex = f;
 				break;
 				
-			case Token.SEMICOLON:
+			default:
 				v.var = var;
 				v.var.exp = null;
+				ex = v;
 				break;
 			}
 			break;

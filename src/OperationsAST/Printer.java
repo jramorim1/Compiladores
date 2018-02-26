@@ -2,6 +2,14 @@ package OperationsAST;
 import AST.*;
 import analizadores.Token;
 
+
+/* FALTA IMPLEMENTAR A CHAMADA DE FUNÇÃO
+ * NO VISITOR E NA AST
+ * 
+ * 
+ * 
+ * 
+ * */
 public class Printer implements Visitor{
 	
 	private int coluna = 0;
@@ -9,6 +17,7 @@ public class Printer implements Visitor{
 	public void print (nodePrograma p) {
 		 System.out.println ("*********[ Starting the AST Printing Process ]**********");
 		 p.visit (this);
+		 System.out.println("[End of AST]");
 		 }
 	
 	private void indent() {
@@ -46,19 +55,14 @@ public class Printer implements Visitor{
 	@Override
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
-			System.out.println("var" + a.var.id.spelling);
+			//indent();
+			System.out.println(a.var.id.spelling);
 			if(a.var.exp != null) {
-				coluna++;
-				indent();
 				a.var.exp.visit(this);
-				coluna--;
 			}
 			
 			if(a.expressao != null) {
-				coluna ++;
-				indent();
 				a.expressao.visit(this);
-				coluna--;
 			}
 		}
 		
@@ -211,12 +215,12 @@ public class Printer implements Visitor{
 	@Override
 	public void visitExpressaoSimples(nodeExpressaoSimples e) {
 		if(e != null) {
-			coluna++;
-			indent();
+			//coluna++;
+			//indent();
 			if(e.op != null) e.op.visit(this);
 			if(e.termo != null) e.termo.visit(this);
 			if(e.next != null) e.next.visit(this);
-			coluna--;
+			//coluna--;
 		}
 		 
 		
@@ -252,53 +256,60 @@ public class Printer implements Visitor{
 	public void visitIdentificador(nodeIdentificador i) {
 		if(i instanceof sequencialIdentificador)
 		 ((sequencialIdentificador)i).visit(this);
-		else
+		else {
+			//coluna++;
+			//indent();
 			System.out.println(i.spelling);
+			//coluna--;
+		}
 	}
 
 	@Override
 	public void visitIfComando(nodeIfComando c) {
 		if(c != null) {
+
 			System.out.println("if");
 			if(c.comandoIf != null) {
 				coluna++;
+				//indent();
+				c.expressao.visit(this);
 				indent();
-			c.expressao.visit(this);
-			System.out.println("then");
-			c.comandoIf.visit(this);
-			coluna--;
-			if(c.comandoElse != null) {
-				System.out.println("else");
-				c.comandoElse.visit(this);
+				System.out.println("then");
+				indent();
+				c.comandoIf.visit(this);
+				if(c.comandoElse != null) {
+					indent();
+					System.out.println("else");
+					c.comandoElse.visit(this);
+				}
+				coluna--;
 			}
-		}
-	} 
-		
-}
+		} 
+
+	}
 
 	@Override
 	public void visitLiteral(nodeLiteral l) {
-		coluna++;
-		indent();
+		//coluna++;
+		//indent();
 		System.out.println(l.spelling);
-		coluna--;
+		//coluna--;
 		
 	}
 
 	@Override
 	public void visitOperator(nodeOperator o) {
-		coluna++;
-		indent();
-		System.out.println(o.spelling);
-		coluna--;
-		
+		System.out.println(o.op.spelling);
 	}
 
 	@Override
 	public void visitParametro(nodeParametro p) {
 		 if(p != null) {
+			 coluna++;
+			 indent();
 			 p.lista.visit(this);
 			 p.tipo.visit(this);
+			 coluna--;
 		 }
 		
 	}
@@ -306,15 +317,15 @@ public class Printer implements Visitor{
 	@Override
 	public void visitPComando(nodePComando p) {
 		if(p != null) {
-			p.id.visit(this);
-			p.lista.visit(this);
+			if(p.id != null) p.id.visit(this);
+			if(p.lista != null) p.lista.visit(this);
 		}
 	}
 
 	@Override
 	public void visitPrograma(nodePrograma p) {
 		if(p != null) {
-			p.id.visit(this);
+			System.out.println(p.id.spelling);
 			if(p.corpo != null)
 				p.corpo.visit(this);
 		}
@@ -369,7 +380,10 @@ public class Printer implements Visitor{
 	@Override
 	public void visitVariavel(nodeVariavel v) {
 		 if(v != null) {
+			 coluna++;
+			 indent();
 			 System.out.println(v.id.spelling);
+			 coluna--;
 			 if(v.exp != null) v.exp.visit(this);
 		 }
 		
@@ -377,13 +391,13 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitWhileComando(nodeWhileComando w) {
-		coluna++;
-		indent();
+
 		 System.out.println("while");
 		 w.expressao.visit(this);
+		 indent();
 		 System.out.println("do");
+		 indent();
 		 w.comando.visit(this);
-		 coluna--;
 	}
 
 	@Override
@@ -430,13 +444,12 @@ public class Printer implements Visitor{
 	@Override
 	public void visitSequencialIdentificador(sequencialIdentificador si) {
 		if(si != null) {
-			 si.I1.visit(this);
-			 if(si.I2 != null) {
-				 coluna++;
-				 indent();
-				 si.I2.visit(this);
-				 coluna--;
-			 }
+			
+			if(si.I1 != null) si.I1.visit(this);
+			coluna++;
+			indent();
+			 if(si.I2 != null) si.I2.visit(this);
+			 coluna--;
 		 }
 		
 	}
