@@ -14,7 +14,7 @@ public class Main {
 		printer.print(p);
 	
 		}catch(Exception e){
-			System.out.println("Não foi possivel abrir o arquivo!");
+			System.out.println(e.getMessage());
 		}
 
 	}

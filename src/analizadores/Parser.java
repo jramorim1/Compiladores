@@ -62,6 +62,7 @@ public class Parser {
 	
 	private void SyntacticError1(Token t){
 		System.out.println("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Unexpected token "+t.spelling+ ".");
+		System.exit(0);
 	}
 	
 	private void SyntacticError2(Token t){

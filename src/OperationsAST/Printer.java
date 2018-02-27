@@ -2,34 +2,34 @@ package OperationsAST;
 import AST.*;
 import analizadores.Token;
 
-
-/* FALTA IMPLEMENTAR A CHAMADA DE FUNÇÃO
- * NO VISITOR E NA AST
- * 
- * 
- * 
+/* Classe responsável por imprimir a AST
+ * Implementa a interface Visitor
  * 
  * */
+
+
 public class Printer implements Visitor{
 	
 	private int coluna = 0;
 	
 	public void print (nodePrograma p) {
-		 System.out.println ("*********[ Starting the AST Printing Process ]**********");
+		if(p != null) {
+		 System.out.println ("*********[ Starting the AST Printing Process ]**********\n\n");
 		 p.visit (this);
-		 System.out.println("[End of AST]");
-		 }
+		 System.out.println("\n\n[End of AST]");
+		}else
+			System.out.println("No program compiled");		 }
 	
 	private void indent() {
 	      for (int j=0; j<coluna; j++) 
-	         System.out.print ("|");
+	         System.out.print (">|");
 	   }
 
 
 	@Override
 	public void visitListaDeclaracao(listaDeclaracao ld) {
 		if(ld != null) {
-			ld.exp.visit(this);
+			if(ld.exp != null) ld.exp.visit(this);
 			if(ld.next != null) {
 				coluna++;
 				indent();
@@ -42,7 +42,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitListaExpressao(listaExpressao le) {
 		if(le != null) {
-			le.exp.visit(this);
+			if(le.exp != null) le.exp.visit(this);
 			if(le.next != null) {
 				coluna++;
 				indent();
@@ -55,8 +55,8 @@ public class Printer implements Visitor{
 	@Override
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
-			//indent();
-			System.out.println(a.var.id.spelling);
+			if(a.var.id != null)
+				System.out.println(a.var.id.spelling);
 			if(a.var.exp != null) {
 				a.var.exp.visit(this);
 			}
@@ -92,13 +92,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitComposto(nodeComposto c) { // metodo inutilizavel aparentemente
 		if(c != null) {
-			if(c.lista instanceof sequencialComando) {
-				coluna++;
-				indent();
-				((sequencialComando)c.lista).C1.visit(this);
-				((sequencialComando)c.lista).C2.visit(this);
-				coluna--;
-			}
+			if(c.lista != null) c.lista.visit(this);
 		}
 	}
 
@@ -165,7 +159,7 @@ public class Printer implements Visitor{
 		 if(e != null) {
 			 coluna++;
 			 indent();
-			 System.out.println(e.name.spelling);
+			if(e.name != null) System.out.println(e.name.spelling);
 			 coluna--;
 		 }
 		
@@ -185,7 +179,6 @@ public class Printer implements Visitor{
 	@Override
 	public void visitExpParenteses(nodeExpParenteses e) {
 		 if(e != null) {
-			 //talvez implementar classe com o token parentenses
 			 e.expressao.visit(this);
 		 }
 		
@@ -215,15 +208,10 @@ public class Printer implements Visitor{
 	@Override
 	public void visitExpressaoSimples(nodeExpressaoSimples e) {
 		if(e != null) {
-			//coluna++;
-			//indent();
 			if(e.op != null) e.op.visit(this);
 			if(e.termo != null) e.termo.visit(this);
 			if(e.next != null) e.next.visit(this);
-			//coluna--;
 		}
-		 
-		
 	}
 
 	@Override
@@ -239,7 +227,8 @@ public class Printer implements Visitor{
 	@Override
 	public void visitFatorFunc(nodeFatorFunc f) {
 		 if(f != null) {
-			 System.out.println(f.id.spelling);
+			if(f.id != null) System.out.println(f.id.spelling);
+			else System.out.println("Null reference id");
 			 if(f.lista != null) f.lista.visit(this);
 		 }
 		
@@ -248,7 +237,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitFatorVar(nodeFatorVar f) {
 		if(f != null) {
-			f.var.visit(this);
+			if(f.var != null) f.var.visit(this);
 		}
 	}
 
@@ -257,10 +246,7 @@ public class Printer implements Visitor{
 		if(i instanceof sequencialIdentificador)
 		 ((sequencialIdentificador)i).visit(this);
 		else {
-			//coluna++;
-			//indent();
 			System.out.println(i.spelling);
-			//coluna--;
 		}
 	}
 
@@ -271,7 +257,6 @@ public class Printer implements Visitor{
 			System.out.println("if");
 			if(c.comandoIf != null) {
 				coluna++;
-				//indent();
 				c.expressao.visit(this);
 				indent();
 				System.out.println("then");
@@ -290,10 +275,7 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitLiteral(nodeLiteral l) {
-		//coluna++;
-		//indent();
 		System.out.println(l.spelling);
-		//coluna--;
 		
 	}
 
