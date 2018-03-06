@@ -124,17 +124,9 @@ public class Parser {
 			
 			switch(currentToken.code) {  
 			
-			case Token.RCOL:	//se achar um "[" de inicio, então pega "[expressao]*"
-
-				nodeExpressao e = null;
-				while(currentToken.code == Token.RCOL) {
-					acceptIt();
-					sequencialExpressao current = new sequencialExpressao(e, parseExpressao());
-					e = current;
-					accept(Token.RCOL);
-				}
-				//criando o ponteiro para a variavel
-				var.exp = e;
+			case Token.LCOL:
+				nodeSeletor seletor = new nodeSeletor(parseSeletor());
+				var.exp = seletor;
 
 			case Token.BECOMES:	//se nao foi o [ mas foi o := , entao pega := expressao
 				atribAST.var = var;
@@ -172,6 +164,17 @@ public class Parser {
 			break;
 		}
 		return comando;
+	}
+	
+	private nodeExpressao parseSeletor() {
+		nodeExpressao e=null;
+		while(currentToken.code == Token.LCOL) {
+			acceptIt();
+			sequencialExpressao current = new sequencialExpressao(e, parseExpressao());
+			e = current;
+			accept(Token.RCOL);
+		}
+		return e;
 	}
 	
 	private boolean compare(byte code) {
@@ -388,16 +391,10 @@ public class Parser {
 			nodeFatorVar v = new nodeFatorVar();
 			var.id = id;
 			switch(currentToken.code) {
+			
 			case Token.LCOL: //espera um colchete para o seletor
-				nodeExpressao first = null;
-				while(compare(Token.LCOL)) {
-					acceptIt();
-					sequencialExpressao current = new sequencialExpressao(first, parseExpressao());
-					first = current;
-					accept(Token.RCOL);
-				}
-				//criar construtor para esta bagunça
-				var.exp = first;
+				nodeSeletor seletor = new nodeSeletor(parseSeletor());
+				var.exp = seletor;
 				v.var = var;
 				ex = v;
 				break;

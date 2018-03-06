@@ -14,15 +14,15 @@ public class Printer implements Visitor{
 	
 	public void print (nodePrograma p) {
 		if(p != null) {
-		 System.out.println ("*********[ Starting the AST Printing Process ]**********\n\n");
+		 System.out.println ("*********[ Starting the AST Printing Process ]**********\n");
 		 p.visit (this);
-		 System.out.println("\n\n[End of AST]");
+		 System.out.println("\n[End of AST]");
 		}else
 			System.out.println("No program compiled");		 }
 	
 	private void indent() {
 	      for (int j=0; j<coluna; j++) 
-	         System.out.print (">|");
+	         System.out.print ("|");
 	   }
 
 
@@ -55,8 +55,11 @@ public class Printer implements Visitor{
 	@Override
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
+			//indent();
+			//System.out.println(":=");
 			if(a.var.id != null)
-				System.out.println(a.var.id.spelling);
+				indent();
+				System.out.println("$"+a.var.id.spelling);
 			if(a.var.exp != null) {
 				a.var.exp.visit(this);
 			}
@@ -92,15 +95,21 @@ public class Printer implements Visitor{
 	@Override
 	public void visitComposto(nodeComposto c) { // metodo inutilizavel aparentemente
 		if(c != null) {
-			if(c.lista != null) c.lista.visit(this);
+			if(c.lista != null) {
+				c.lista.visit(this);
+			}
+			
 		}
 	}
 
 	@Override
 	public void visitCorpo(nodeCorpo c) {
 		if(c != null) {
-			if(c.declarations != null) 
+			if(c.declarations != null) {
+				System.out.println("/#");
 					c.declarations.visit(this);
+					System.out.println("#/");
+			}
 			
 			if(c.comandos != null) 
 				c.comandos.visit(this);
@@ -123,8 +132,10 @@ public class Printer implements Visitor{
 	@Override
 	public void visitDeclaracao(nodeDeclaracao d) {
 		if(d != null) {
-			if(d instanceof nodeDecVariavel)
+			if(d instanceof nodeDecVariavel) {
+				 System.out.println("#");
 				((nodeDecVariavel)d).visit(this);
+			}
 			else if( d instanceof nodeDecProcedimento)
 				((nodeDecProcedimento)d).visit(this);
 			else if(d instanceof nodeDecFuncao)
@@ -148,7 +159,10 @@ public class Printer implements Visitor{
 	@Override
 	public void visitDecVariavel(nodeDecVariavel dv) {
 		 if(dv != null) {
-			 if(dv.lista != null) dv.lista.visit(this);
+			 if(dv.lista != null) {
+
+				 dv.lista.visit(this);
+			 }
 			 if(dv.tipo != null) dv.tipo.visit(this);
 		 }
 		
@@ -201,6 +215,11 @@ public class Printer implements Visitor{
 				 ((nodeTermo)e).visit(this);
 			 else if(e instanceof nodeFator)
 				 ((nodeFator)e).visit(this);
+			 else if(e instanceof nodeSeletor) {
+				 System.out.print("[");
+				 ((nodeSeletor)e).visit(this);
+				 System.out.print("]");
+			 }
 		 }
 		
 	}
@@ -227,8 +246,12 @@ public class Printer implements Visitor{
 	@Override
 	public void visitFatorFunc(nodeFatorFunc f) {
 		 if(f != null) {
-			if(f.id != null) System.out.println(f.id.spelling);
-			else System.out.println("Null reference id");
+			if(f.id != null) {
+				indent();
+				System.out.println(f.id.spelling);
+				}
+			
+			//else System.out.println("Null reference id");
 			 if(f.lista != null) f.lista.visit(this);
 		 }
 		
@@ -243,31 +266,21 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitIdentificador(nodeIdentificador i) {
-		if(i instanceof sequencialIdentificador)
-		 ((sequencialIdentificador)i).visit(this);
-		else {
-			System.out.println(i.spelling);
-		}
+		System.out.println(i.spelling);
 	}
 
 	@Override
 	public void visitIfComando(nodeIfComando c) {
 		if(c != null) {
-
 			System.out.println("if");
 			if(c.comandoIf != null) {
-				coluna++;
 				c.expressao.visit(this);
-				indent();
 				System.out.println("then");
-				indent();
 				c.comandoIf.visit(this);
 				if(c.comandoElse != null) {
-					indent();
 					System.out.println("else");
 					c.comandoElse.visit(this);
 				}
-				coluna--;
 			}
 		} 
 
@@ -287,7 +300,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitParametro(nodeParametro p) {
 		 if(p != null) {
-			 coluna++;
+			coluna++;
 			 indent();
 			 p.lista.visit(this);
 			 p.tipo.visit(this);
@@ -342,7 +355,9 @@ public class Printer implements Visitor{
 			 coluna++;
 			 indent();
 			 System.out.println("array");
+			 indent();
 			 System.out.println(t.intLeft.spelling);
+			 indent();
 			 System.out.println(t.intRight.spelling);
 			 t.tipo.visit(this);
 		 }
@@ -378,19 +393,23 @@ public class Printer implements Visitor{
 		 w.expressao.visit(this);
 		 indent();
 		 System.out.println("do");
-		 indent();
+		 //indent();
 		 w.comando.visit(this);
 	}
 
 	@Override
 	public void visitSequencialComando(sequencialComando sc) {
 		 if(sc != null) {
-			 if(sc.C1 != null) sc.C1.visit(this);
+			 //indent();
+			 if(sc.C1 != null) {
+				 //indent();
+				 sc.C1.visit(this);
+			 }
 			 if(sc.C2 != null) {
 				 coluna++;
 				 indent();
 				 sc.C2.visit(this);
-				 coluna--;
+				coluna--;
 			 }
 		 }
 		
@@ -413,12 +432,9 @@ public class Printer implements Visitor{
 	@Override
 	public void visitSequencialExpressao(sequencialExpressao se) {
 		if(se != null) {
-			 se.exp.visit(this);
+			if(se.exp != null) se.exp.visit(this);
 			 if(se.next != null) {
-				 coluna++;
-				 indent();
 				 se.next.visit(this);
-				 coluna--;
 			 }
 		 }
 	}
@@ -427,25 +443,35 @@ public class Printer implements Visitor{
 	public void visitSequencialIdentificador(sequencialIdentificador si) {
 		if(si != null) {
 			
-			if(si.I1 != null) si.I1.visit(this);
-			coluna++;
-			indent();
-			 if(si.I2 != null) si.I2.visit(this);
-			 coluna--;
+			if(si.I1 != null) si.I1.visit(this);			
+			 if(si.I2 != null) {
+				 	coluna++;
+					indent();
+					si.I2.visit(this);
+					coluna--;
+					 }
+			 
+			
 		 }
 		
 	}
-
 	@Override
 	public void visitSequencialParametro(sequencialParametro sp) {
 		if(sp != null) {
-			 sp.P1.visit(this);
+			if(sp.P1 != null) sp.P1.visit(this);
 			 if(sp.P2 != null) {
-				 coluna++;
-				 indent();
+				// coluna++;
+				// indent();
 				 sp.P2.visit(this);
-				 coluna--;
+				// coluna--;
 			 }
 		 }
+	}
+
+	@Override
+	public void visitSeletor(nodeSeletor s) {
+		if(s != null) {
+			if(s.lista != null) s.lista.visit(this);
+		}
 	}
 }

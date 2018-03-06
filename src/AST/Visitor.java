@@ -13,6 +13,7 @@ public interface Visitor {
 	public void visitDecVariavel(nodeDecVariavel dv);
 	public void visitEn(nodeEn e);
 	public void visitEo(nodeEo e);
+	public void visitSeletor(nodeSeletor s);
 	public void visitExpParenteses(nodeExpParenteses e);
 	public void visitExpressao(nodeExpressao e);
 	public void visitExpressaoSimples(nodeExpressaoSimples e);
