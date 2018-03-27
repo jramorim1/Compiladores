@@ -311,7 +311,7 @@ public class Parser {
     	nodeDecVariavel dVarAST = new nodeDecVariavel();
     	
     	accept(Token.VAR);
-    	dVarAST.lista = parseListaDeIDs();
+    	dVarAST = parseListaDeIDs();
     	accept(Token.COLON);
     	dVarAST.tipo = parseTipo();
     	
@@ -450,15 +450,26 @@ public class Parser {
 		return last;
 	}
 	
-    private nodeIdentificador parseListaDeIDs(){
-    	nodeIdentificador last;
-		last = parseIdentifier();
+    private nodeDecVariavel parseListaDeIDs(){
+    	nodeDecVariavel first, last, d;
+    	last = null;
+    	first = null;
+    	d = new nodeDecVariavel();
+        d.id = parseIdentifier();
+        d.next = null;
+        if (first==null) first=d;
+           else last.next=d;
+        last=d;
 		while(compare(Token.POINT)) {
 			acceptIt();
-			sequencialIdentificador current = new sequencialIdentificador(last, parseIdentifier());
-			last = current;
+			d = new nodeDecVariavel();
+		    d.id = parseIdentifier();
+		    d.next = null;
+		    if (first==null) first=d;
+		       else last.next=d;
+		    last=d;
 		}
-		return last;
+		return first;
 	}
     
     private nodeParametro parseListaDeParametros(){
@@ -474,11 +485,12 @@ public class Parser {
     
     private nodeParametro parseParametros(){
     	nodeParametro p = new nodeParametro();	
-		if(compare(Token.VAR))
+	/*	if(compare(Token.VAR))
 			acceptIt();
 		p.lista = parseListaDeIDs();
 		accept(Token.COLON);
-		p.tipo = parseTipoSimples();
+		p.tipo = parseTipoSimples();*/
+    	p.lista = (nodeDecVariavel)parseDeclaracaoDeVariavel();
 		return p;
 	}
     

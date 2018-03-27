@@ -10,8 +10,10 @@ public class Main {
 		Parser parser = new Parser(path);
 		nodePrograma p;
 		Printer printer = new Printer();
+		Checker checker = new Checker();
 		p = parser.parse();
 		printer.print(p);
+		checker.check(p);
 	
 		}catch(Exception e){
 			System.out.println(e.getMessage());

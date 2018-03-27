@@ -1,30 +1,29 @@
-program test;
-var a, b, c, d, e : integer;
-begin
-    a := 3;
-    b := a*3;
-    if(b > 7) then
-    begin
-        c := a+b-2;
-        if(c < 5) then
-        begin
-            d := c+a-b;
-        end
-        else
-        begin
-            d := c-a+b;
-        end;
-    end
-    else
-    begin
-        c := a*b/2;
-        if(c > 5) then
-            d := 6
-        else
-            d := 7;
-    end;
-
-    e := 7;
-
-    printInt(a*b+c/d-e);
-end.
+program programaDeTesteValido1 ; 
+	var variavelInteira1, variavelInteira2 : integer ; 
+	var variavelDeProcedimento: real ; 
+	
+	procedure procedimento ( ) ; 
+		var variavelDeProcedimento : real;
+		
+		begin
+			variavelDeProcedimento := 29.200;
+			variavelInteira1 := variavelInteira1 * variavelInteira2;
+		end 
+	;
+	function funcao ( var parametroDeFuncao1 : integer ; var parametroDeFuncao2 : integer ) : integer ;
+		var variavelDeFuncao : boolean ;
+		begin
+			if ( parametroDeFuncao1 >= parametroDeFuncao2 ) then
+				variavelInteira1 := 10
+			else
+				begin
+					variavelInteira1 := 5;
+					variavelInteira2 := variavelInteira1 * 10 + parametroDeFuncao1;
+					procedimento();
+				end
+				;
+		end 
+	;
+	begin  
+	end
+.

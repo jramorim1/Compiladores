@@ -3,11 +3,19 @@ import AST.*;
 import analizadores.Token;
 
 public class Checker implements Visitor {
+	
+	IdentificationTable idTable = new IdentificationTable();
+	
+	public void check(nodePrograma p) {
+		if(p != null)
+			p.visit(this);
+		
+	}
 
 	public void visitListaDeclaracao(listaDeclaracao ld) {
-		if(ld != null) {
+			//if(ld.exp != null) ld.exp.visit(this);
 			if(ld.exp != null) ld.exp.visit(this);
-			if(ld.next != null) {ld.next.visit(this);}
+			if(ld.next != null) {ld.next.visit(this);
 		}
 	}
 
@@ -22,7 +30,9 @@ public class Checker implements Visitor {
 	@Override
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
-			if(a.var.id != null) {}
+			if(a.var.id != null) {
+				//nodeDeclaracao d = this.idTable.retrieve(a.var.id.spelling);
+			}
 			if(a.var.exp != null) {
 				a.var.exp.visit(this);
 			}
@@ -59,7 +69,9 @@ public class Checker implements Visitor {
 	public void visitComposto(nodeComposto c) {
 		if(c != null) {
 			if(c.lista != null) {
+				this.idTable.openScope();
 				c.lista.visit(this);
+				this.idTable.closeScope();
 			}
 		}
 	}
@@ -67,21 +79,26 @@ public class Checker implements Visitor {
 	@Override
 	public void visitCorpo(nodeCorpo c) {
 		if(c != null) {
+			//this.idTable.openScope();
 			if(c.declarations != null) {
 				c.declarations.visit(this);
 			}
 			if(c.comandos != null) 
 				c.comandos.visit(this);
+			//this.idTable.closeScope();
 		}
 	}
 
 	@Override
 	public void visitDecFuncao(nodeDecFuncao df) {
 		if(df != null) {
+			idTable.enter(df.id.spelling, df);
 			if(df.id != null) df.id.visit(this);
+			this.idTable.openScope();
 			if(df.lista != null) df.lista.visit(this);
 			if(df.tipo != null) df.tipo.visit(this);
 			if(df.corpo != null) df.corpo.visit(this);
+			this.idTable.closeScope();
 		}
 
 
@@ -105,9 +122,13 @@ public class Checker implements Visitor {
 	@Override
 	public void visitDecProcedimento(nodeDecProcedimento dp) {
 		if(dp != null) {
+			idTable.enter(dp.id.spelling, dp);
+			
 			if(dp.id != null) dp.id.visit(this);
+			this.idTable.openScope();
 			if(dp.lista != null) dp.lista.visit(this);
 			if(dp.corpo != null) dp.corpo.visit(this);
+			this.idTable.closeScope();
 		}
 
 
@@ -116,11 +137,11 @@ public class Checker implements Visitor {
 	@Override
 	public void visitDecVariavel(nodeDecVariavel dv) {
 		if(dv != null) {
-			if(dv.lista != null) {
-
-				dv.lista.visit(this);
-			}
+			//idTable.enter(dv.id.spelling, dp);
+			//if(dv.lista != null) dv.id.visit(this);
+			if(dv.id != null) idTable.enter(dv.id.spelling, dv);
 			if(dv.tipo != null) dv.tipo.visit(this);
+			if(dv.next != null) dv.next.visit(this);
 		}
 
 	}
@@ -128,14 +149,24 @@ public class Checker implements Visitor {
 	@Override
 	public void visitEn(nodeEn e) {
 		if(e != null) 
-			if(e.name != null) {}
+			if(e.name != null) {//verificar se nao é literal
+				if((e.name.code == Token.INTLITERAL) || (e.name.code == Token.FLOATLIT || (e.name.code == Token.BOOLLIT))){
+					e.tipo = e.name.code;
+				}else
+				e.tipo = this.idTable.retrieve(e.name.spelling);
+			}
 	}
 
 	@Override
-	public void visitEo(nodeEo e) {
+	public void visitEo(nodeEo e) {//verificar possibilidade aqui
+		if(e != null) {
+			nodeDeclaracao d1, d2;
 		if(e.op != null) e.op.visit(this);
 		if(e.left != null) e.left.visit(this);
 		if(e.right != null) e.right.visit(this);
+		
+		
+		}
 	}
 
 	@Override
@@ -239,11 +270,7 @@ public class Checker implements Visitor {
 	@Override
 	public void visitParametro(nodeParametro p) {
 		if(p != null) {
-
-
-			p.lista.visit(this);
-			p.tipo.visit(this);
-
+		if(p.lista!=null) p.lista.visit(this);
 		}
 
 	}
@@ -259,8 +286,11 @@ public class Checker implements Visitor {
 	@Override
 	public void visitPrograma(nodePrograma p) {
 		if(p != null) {
-			if(p.corpo != null)
+			if(p.corpo != null) {
+				this.idTable.openScope();
 				p.corpo.visit(this);
+				this.idTable.closeScope();
+			}
 		}
 	}
 
@@ -284,7 +314,6 @@ public class Checker implements Visitor {
 			else 
 				((nodeTipoAgregado)t).visit(this);
 		}
-
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public class Printer implements Visitor{
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
 			//indent();
-			//System.out.println(":=");
+			System.out.println(":=");
 			if(a.var.id != null)
 				indent();
 				System.out.println("$"+a.var.id.spelling);
@@ -106,9 +106,9 @@ public class Printer implements Visitor{
 	public void visitCorpo(nodeCorpo c) {
 		if(c != null) {
 			if(c.declarations != null) {
-				System.out.println("/#");
+				//System.out.println("/#");
 					c.declarations.visit(this);
-					System.out.println("#/");
+					//System.out.println("#/");
 			}
 			
 			if(c.comandos != null) 
@@ -159,10 +159,8 @@ public class Printer implements Visitor{
 	@Override
 	public void visitDecVariavel(nodeDecVariavel dv) {
 		 if(dv != null) {
-			 if(dv.lista != null) {
-
-				 dv.lista.visit(this);
-			 }
+			 if(dv.id != null) dv.id.visit(this);
+			 if(dv.next != null) dv.next.visit(this);
 			 if(dv.tipo != null) dv.tipo.visit(this);
 		 }
 		
@@ -302,8 +300,8 @@ public class Printer implements Visitor{
 		 if(p != null) {
 			coluna++;
 			 indent();
+			 if(p.lista != null)
 			 p.lista.visit(this);
-			 p.tipo.visit(this);
 			 coluna--;
 		 }
 		
