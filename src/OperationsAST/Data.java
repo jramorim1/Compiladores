@@ -43,7 +43,7 @@ public class Data {
 				}
 			}
 		}else if(decl instanceof nodeDecFuncao) {
-			nodeTipo t0 = ((nodeDecVariavel)decl).tipo;
+			nodeTipo t0 = ((nodeDecFuncao)decl).tipo;
 			
 			if(t0 instanceof nodeTipoSimples) {
 				return ((nodeTipoSimples)t0).tipo;

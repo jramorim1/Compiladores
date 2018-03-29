@@ -88,6 +88,7 @@ public class Parser {
 			if(currentToken.code == Token.IDENTIFIER) {
 				id = new nodeIdentificador();
 				id.spelling = currentToken.spelling;
+				id.code = currentToken.code;
 				currentToken = this.scanner.scan();
 			}else {
 				SyntacticError1(currentToken);
@@ -261,8 +262,7 @@ public class Parser {
     
     private nodeDeclaracao parseDeclaracaoDeFuncao(){
     	nodeDecFuncao dfuncAST = new nodeDecFuncao();
-    	
-    	accept(Token.FUNCTION);
+       	accept(Token.FUNCTION);
     	nodeIdentificador id = parseIdentifier();
     	accept(Token.LPAREN);
     	
@@ -314,9 +314,14 @@ public class Parser {
     	dVarAST = parseListaDeIDs();
     	accept(Token.COLON);
     	dVarAST.tipo = parseTipo();
-    	
+    	nodeDecVariavel d = dVarAST;
+    	nodeTipo t = d.tipo;
+    	while(d != null) {
+    		if(d.tipo == null)
+    			d.tipo = t;
+    		d = (nodeDecVariavel)d.next;
+    	}
     	return dVarAST;
-		
 	}
     
     private nodeExpressao parseExpressao(){
@@ -360,6 +365,7 @@ public class Parser {
     	try {
     		litAST = new nodeLiteral();
     		litAST.spelling = currentToken.spelling;
+    		litAST.code = currentToken.code;
     		currentToken = this.scanner.scan();
     		
     	}catch(IOException e) {

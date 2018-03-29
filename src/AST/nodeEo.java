@@ -3,7 +3,7 @@ package AST;
 public class nodeEo extends nodeExpressao{
 	public nodeExpressao left, right;
 	public nodeOperator op;
-	public nodeDeclaracao decl;
+	//public byte tipo;
 	
 	
 	public nodeEo(nodeExpressao l, nodeOperator op, nodeExpressao r) {

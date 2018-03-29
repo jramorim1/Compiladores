@@ -40,6 +40,15 @@ public class Checker implements Visitor {
 			if(a.expressao != null) {
 				a.expressao.visit(this);
 			}
+			
+			byte varTipo = this.idTable.retrieve(a.var.id.spelling);
+			byte expTipo = a.expressao.tipo;
+			
+			if(varTipo != expTipo) {
+				System.out.println("Incorrect Types");
+				System.exit(0);
+			}
+			
 		}
 
 	}
@@ -150,9 +159,15 @@ public class Checker implements Visitor {
 	public void visitEn(nodeEn e) {
 		if(e != null) 
 			if(e.name != null) {//verificar se nao é literal
-				if((e.name.code == Token.INTLITERAL) || (e.name.code == Token.FLOATLIT || (e.name.code == Token.BOOLLIT))){
-					e.tipo = e.name.code;
-				}else
+				if(e.name.code == Token.INTLITERAL)
+					e.tipo = Token.INTEGER;
+				else 
+					if(e.name.code == Token.FLOATLIT)
+						e.tipo = Token.REAL;
+				else
+					if(e.name.code == Token.BOOLLIT)
+						e.tipo = Token.BOOLEAN;
+				else
 				e.tipo = this.idTable.retrieve(e.name.spelling);
 			}
 	}
@@ -160,13 +175,55 @@ public class Checker implements Visitor {
 	@Override
 	public void visitEo(nodeEo e) {//verificar possibilidade aqui
 		if(e != null) {
-			nodeDeclaracao d1, d2;
 		if(e.op != null) e.op.visit(this);
 		if(e.left != null) e.left.visit(this);
 		if(e.right != null) e.right.visit(this);
 		
+		byte tipo1 = e.left.tipo;
+		byte tipo2 = e.right.tipo;
+		byte op = e.op.op.code;
 		
+		e.tipo = compareTypes(tipo1, tipo2, op);
+		
+			}
 		}
+	
+	private byte compareTypes(byte t1, byte t2, byte op) {
+		if(op == Token.OPAD || op == Token.OPMUL) {
+			
+		if( t1 == Token.REAL &&  t2 == Token.REAL) 
+			return Token.REAL;
+		
+			else if((t1 == Token.REAL && t2 == Token.INTEGER) || (t2 == Token.REAL && t1 == Token.INTEGER))
+				return Token.REAL;
+		
+			else if(t1 == Token.INTEGER && t2 == Token.INTEGER)
+				return Token.INTEGER;
+		
+			else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
+				return Token.BOOLEAN;
+			else {
+				System.out.println("Incorrect Types!");
+				System.exit(0);
+			}
+		}else {
+			if( t1 == Token.REAL &&  t2 == Token.REAL) 
+				return Token.BOOLEAN;
+			
+				else if((t1 == Token.REAL && t2 == Token.INTEGER) || (t2 == Token.REAL && t1 == Token.INTEGER))
+					return Token.BOOLEAN;
+			
+				else if(t1 == Token.INTEGER && t2 == Token.INTEGER)
+					return Token.BOOLEAN;
+			
+				else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
+					return Token.BOOLEAN;
+				else {
+					System.out.println("Incorrect Types!");
+					System.exit(0);
+				}
+		}
+		return 0;
 	}
 
 	@Override
@@ -186,10 +243,14 @@ public class Checker implements Visitor {
 				((nodeExpParenteses)e).visit(this);
 			else if( e instanceof sequencialExpressao)
 				((sequencialExpressao)e).visit(this);
-			else if(e instanceof nodeEn)
+			else if(e instanceof nodeEn) {
 				((nodeEn)e).visit(this);
-			else if(e instanceof nodeEo)
+				e.tipo = ((nodeEn)e).tipo;
+			}
+			else if(e instanceof nodeEo) {
 				((nodeEo)e).visit(this);
+				e.tipo = ((nodeEo)e).tipo;
+			}
 			else if (e instanceof nodeTermo)
 				((nodeTermo)e).visit(this);
 			else if(e instanceof nodeFator)
@@ -224,6 +285,7 @@ public class Checker implements Visitor {
 	public void visitFatorFunc(nodeFatorFunc f) {
 		if(f != null) {
 			if(f.id != null) {
+				f.tipo = this.idTable.retrieve(f.id.spelling);
 			}
 			if(f.lista != null) f.lista.visit(this);
 		}
@@ -233,7 +295,12 @@ public class Checker implements Visitor {
 	@Override
 	public void visitFatorVar(nodeFatorVar f) {
 		if(f != null) {
-			if(f.var != null) f.var.visit(this);
+			if(f.var != null) {
+				f.var.visit(this);
+				//verificar se nao é literal
+					f.tipo = this.idTable.retrieve(f.var.id.spelling);
+				
+			}
 		}
 	}
 
@@ -245,9 +312,13 @@ public class Checker implements Visitor {
 	@Override
 	public void visitIfComando(nodeIfComando c) {
 		if(c != null) {
-			if(c.comandoIf != null) {
+			if(c.comandoIf != null) { 
 				c.expressao.visit(this);
-
+				byte tipo = c.expressao.tipo;
+				if(tipo != Token.BOOLEAN) {
+					System.out.println("Incompatible Types in If Expression ");
+					System.exit(0);
+				}
 				c.comandoIf.visit(this);
 				if(c.comandoElse != null) {
 
@@ -344,9 +415,19 @@ public class Checker implements Visitor {
 
 	@Override
 	public void visitWhileComando(nodeWhileComando w) {
-
-		w.expressao.visit(this);
-		w.comando.visit(this);
+		if(w != null) {
+		if(w.expressao != null) {
+			w.expressao.visit(this);
+			byte tipo = w.expressao.tipo;
+			if(tipo != Token.BOOLEAN) {
+				System.out.println("Incompatible Types in While Expression");
+				System.exit(0);
+			}
+		}
+		if(w.comando != null) {
+			w.comando.visit(this);
+			}
+		}
 	}
 
 	@Override
