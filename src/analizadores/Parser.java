@@ -183,7 +183,24 @@ public class Parser {
 	}
 	
 	private nodeComando parseComandoComposto(){
-		nodeComando c1;
+		
+		sequencialComando first, last, d;
+    	last = null;
+    	first = null;
+    	
+    	accept(Token.BEGIN);
+		while(compare(Token.IF) || compare(Token.BEGIN) || compare(Token.WHILE) || compare(Token.IDENTIFIER)) {
+			
+			d = new sequencialComando(parseComando(), null);
+			if (first==null) first=d;
+		       else last.C2 = d;
+		    last=d;
+			accept(Token.SEMICOLON);
+		}
+		accept(Token.END);
+		return first;
+    	
+		/*nodeComando c1;
 		sequencialComando lista = null;
 		
 		accept(Token.BEGIN);
@@ -195,6 +212,7 @@ public class Parser {
 		accept(Token.END);
 		c1 = lista;
 		return c1;
+		*/
 	}
     
 	private nodeComando parseCondicional(){
@@ -225,15 +243,29 @@ public class Parser {
 	
     private nodeCorpo parseCorpo(){
     	nodeCorpo corpo = new nodeCorpo();
-    	nodeDeclaracao lista = null;
+    	
+    	sequencialDeclaration first, last, d;
+    	first = null;
+    	last = null;
+    	
+    	while(compare(Token.VAR) || compare(Token.FUNCTION) || compare(Token.PROCEDURE)) {
+    		d = new sequencialDeclaration(parseDeclaracao(), null);
+    		if (first == null) first=d;
+		       else last.D2 = d;
+		    last=d;
+    		accept(Token.SEMICOLON);
+    	}
+    	
+    	/*nodeDeclaracao lista = null;
     	while(compare(Token.VAR) || compare(Token.FUNCTION) || compare(Token.PROCEDURE)) {
     		sequencialDeclaration current = new sequencialDeclaration(lista, parseDeclaracao());
     		lista = current;
     		accept(Token.SEMICOLON);
     	}
+    	*/
     	nodeComando comAST = parseComandoComposto();
     	corpo.comandos = comAST;
-    	corpo.declarations = lista;
+    	corpo.declarations = first;
     	return corpo;
 	}
     
@@ -446,7 +478,25 @@ public class Parser {
     
     
     private nodeExpressao parseListaDeExpressoes(){
-    	nodeExpressao last;
+    	
+    	sequencialExpressao first, last, d;
+    	last = null;
+    	first = null;
+    	d = new sequencialExpressao(parseExpressao(), null);
+        if (first==null) first=d;
+           else last.next=d;
+        last=d;
+        
+        while(compare(Token.POINT)) {
+			acceptIt();
+			d = new sequencialExpressao(parseExpressao(), null);
+		    if (first==null) first=d;
+		       else last.next=d;
+		    last=d;
+		}
+		return first;
+    	
+    	/*nodeExpressao last;
 		last = parseExpressao();
 		while(compare(Token.POINT)) {
 			acceptIt();
@@ -454,6 +504,7 @@ public class Parser {
 			last = current;
 		}
 		return last;
+		*/
 	}
 	
     private nodeDecVariavel parseListaDeIDs(){
@@ -479,7 +530,16 @@ public class Parser {
 	}
     
     private nodeParametro parseListaDeParametros(){
-    	nodeParametro last;
+    	nodeParametro p = new nodeParametro();
+    	p.lista = (nodeDecVariavel)parseDeclaracaoDeVariavel();
+    	nodeDecVariavel d = p.lista;
+    	while(compare(Token.SEMICOLON)) {
+    		acceptIt();
+    		d.next = (nodeDecVariavel)parseDeclaracaoDeVariavel();
+    		d = (nodeDecVariavel)d.next;
+    	}
+    	return p;
+    	/*nodeParametro last;
     	last = parseParametros();
     	while(compare(Token.SEMICOLON)) {
     		acceptIt();
@@ -487,6 +547,7 @@ public class Parser {
     		last = current;
     	}
 		return last;
+		*/
 	}
     
     private nodeParametro parseParametros(){

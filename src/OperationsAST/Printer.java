@@ -121,9 +121,20 @@ public class Printer implements Visitor{
 	public void visitDecFuncao(nodeDecFuncao df) {
 		if(df != null) {
 			if(df.id != null) df.id.visit(this);
-			if(df.lista != null) df.lista.visit(this);
-			if(df.tipo != null) df.tipo.visit(this);
-			if(df.corpo != null) df.corpo.visit(this);
+			
+			if(df.lista != null) {
+				indent();
+				df.lista.visit(this);
+			}
+			if(df.tipo != null) {
+				
+				df.tipo.visit(this);
+			}
+			
+			if(df.corpo != null) {
+				indent();
+				df.corpo.visit(this);
+			}
 		}
 		 
 		
@@ -133,7 +144,6 @@ public class Printer implements Visitor{
 	public void visitDeclaracao(nodeDeclaracao d) {
 		if(d != null) {
 			if(d instanceof nodeDecVariavel) {
-				 System.out.println("#");
 				((nodeDecVariavel)d).visit(this);
 			}
 			else if( d instanceof nodeDecProcedimento)
@@ -148,9 +158,20 @@ public class Printer implements Visitor{
 	@Override
 	public void visitDecProcedimento(nodeDecProcedimento dp) {
 		if(dp != null) {
-			if(dp.id != null) dp.id.visit(this);
-			if(dp.lista != null) dp.lista.visit(this);
-			if(dp.corpo != null) dp.corpo.visit(this);
+			if(dp.id != null) {
+				dp.id.visit(this);
+			}
+			
+			if(dp.lista != null) {
+				indent();
+				dp.lista.visit(this);
+			}
+			
+			if(dp.corpo != null) 
+				{
+				indent();
+				dp.corpo.visit(this);
+				}
 		}
 		 
 		
@@ -160,7 +181,12 @@ public class Printer implements Visitor{
 	public void visitDecVariavel(nodeDecVariavel dv) {
 		 if(dv != null) {
 			 if(dv.id != null) dv.id.visit(this);
-			 if(dv.next != null) dv.next.visit(this);
+			 if(dv.next != null) {
+				 coluna++;
+				 indent();
+				 dv.next.visit(this);
+				 coluna--;
+			 }
 			 if(dv.tipo != null) dv.tipo.visit(this);
 		 }
 		
@@ -169,10 +195,12 @@ public class Printer implements Visitor{
 	@Override
 	public void visitEn(nodeEn e) {
 		 if(e != null) {
-			 coluna++;
-			 indent();
-			if(e.name != null) System.out.println(e.name.spelling);
-			 coluna--;
+			if(e.name != null) {
+				 coluna++;
+				 indent();
+				System.out.println(e.name.spelling);
+				coluna--;
+			}
 		 }
 		
 	}
@@ -180,7 +208,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitEo(nodeEo e) {
 		 coluna++;
-		 indent();
+		 indent();//talvex
 		 if(e.op != null) e.op.visit(this);
 		 if(e.left != null) e.left.visit(this);
 		 if(e.right != null) e.right.visit(this);
@@ -249,8 +277,10 @@ public class Printer implements Visitor{
 				System.out.println(f.id.spelling);
 				}
 			
-			//else System.out.println("Null reference id");
-			 if(f.lista != null) f.lista.visit(this);
+			 if(f.lista != null) {
+				 indent();
+				 f.lista.visit(this);
+			 }
 		 }
 		
 	}
@@ -264,18 +294,25 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitIdentificador(nodeIdentificador i) {
+		//indent();
 		System.out.println(i.spelling);
 	}
 
 	@Override
 	public void visitIfComando(nodeIfComando c) {
 		if(c != null) {
-			System.out.println("if");
+			
 			if(c.comandoIf != null) {
+				indent();
+				System.out.println("if");
+				
 				c.expressao.visit(this);
+				indent();
 				System.out.println("then");
+				indent();
 				c.comandoIf.visit(this);
 				if(c.comandoElse != null) {
+					indent();
 					System.out.println("else");
 					c.comandoElse.visit(this);
 				}
@@ -298,11 +335,8 @@ public class Printer implements Visitor{
 	@Override
 	public void visitParametro(nodeParametro p) {
 		 if(p != null) {
-			coluna++;
-			 indent();
 			 if(p.lista != null)
 			 p.lista.visit(this);
-			 coluna--;
 		 }
 		
 	}
@@ -311,7 +345,11 @@ public class Printer implements Visitor{
 	public void visitPComando(nodePComando p) {
 		if(p != null) {
 			if(p.id != null) p.id.visit(this);
-			if(p.lista != null) p.lista.visit(this);
+			
+			if(p.lista != null) {
+				indent();
+				p.lista.visit(this);
+			}
 		}
 	}
 
@@ -386,28 +424,27 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitWhileComando(nodeWhileComando w) {
-
+		if(w != null) {
 		 System.out.println("while");
 		 w.expressao.visit(this);
 		 indent();
 		 System.out.println("do");
 		 //indent();
 		 w.comando.visit(this);
+		}
 	}
 
 	@Override
 	public void visitSequencialComando(sequencialComando sc) {
 		 if(sc != null) {
-			 //indent();
 			 if(sc.C1 != null) {
-				 //indent();
 				 sc.C1.visit(this);
 			 }
 			 if(sc.C2 != null) {
 				 coluna++;
 				 indent();
 				 sc.C2.visit(this);
-				coluna--;
+				 coluna--;
 			 }
 		 }
 		
@@ -432,7 +469,10 @@ public class Printer implements Visitor{
 		if(se != null) {
 			if(se.exp != null) se.exp.visit(this);
 			 if(se.next != null) {
+				 coluna++;
+				 indent();
 				 se.next.visit(this);
+				 coluna--;
 			 }
 		 }
 	}
@@ -447,21 +487,18 @@ public class Printer implements Visitor{
 					indent();
 					si.I2.visit(this);
 					coluna--;
-					 }
-			 
-			
+			}
 		 }
-		
 	}
 	@Override
 	public void visitSequencialParametro(sequencialParametro sp) {
 		if(sp != null) {
 			if(sp.P1 != null) sp.P1.visit(this);
 			 if(sp.P2 != null) {
-				// coluna++;
-				// indent();
-				 sp.P2.visit(this);
-				// coluna--;
+				coluna++;
+				indent();
+				sp.P2.visit(this);
+				coluna--;
 			 }
 		 }
 	}

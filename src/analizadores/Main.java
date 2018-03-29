@@ -12,7 +12,7 @@ public class Main {
 		Printer printer = new Printer();
 		Checker checker = new Checker();
 		p = parser.parse();
-		//printer.print(p);
+		printer.print(p);
 		checker.check(p);
 	
 		}catch(Exception e){

@@ -288,6 +288,7 @@ public class Checker implements Visitor {
 				f.tipo = this.idTable.retrieve(f.id.spelling);
 			}
 			if(f.lista != null) f.lista.visit(this);
+		
 		}
 
 	}
@@ -392,6 +393,18 @@ public class Checker implements Visitor {
 		if(t != null) {
 			//System.out.println(t.intLeft.spelling);
 			//System.out.println(t.intRight.spelling);
+			
+			if(t.intLeft.code != Token.INTLITERAL || t.intRight.code != Token.INTLITERAL) {
+				System.out.println("Literal operands in Array Declaration must be an Integer");
+				System.exit(0);
+			}
+			
+			int leftInt = Integer.parseInt(t.intLeft.spelling);
+			int rightInt = Integer.parseInt(t.intRight.spelling);
+			if(leftInt > rightInt) {
+				System.out.println("First Operand is most larger than Second in Array Declaration");
+				System.exit(0);
+			}
 			t.tipo.visit(this);
 		}
 	}
