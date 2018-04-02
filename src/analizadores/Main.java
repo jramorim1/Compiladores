@@ -6,7 +6,7 @@ public class Main {
 
 	public static void main(String[] args){
 		try{
-		String path = "C:\\Users\\oieus\\git\\Compiladores\\src\\analizadores\\programa.txt";	
+		String path = "C:\\Users\\jramo\\Desktop\\Compiladores\\src\\analizadores\\programa.txt";	
 		//Scanner scanner = new Scanner(path);
 		/*Token t = scanner.scan();
 		while(t.code != Token.EOF) {
@@ -36,7 +36,6 @@ public class Main {
 		}catch(Exception e){
 			System.out.println(e.getMessage());
 		}
-
+		System.exit(0);
 	}
-
 }

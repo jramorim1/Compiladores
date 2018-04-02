@@ -307,8 +307,10 @@ public class Checker implements Visitor {
 				f.tipo = this.idTable.retrieve(f.id.spelling);
 			}
 			if(f.lista != null) {
-				decl = (nodeDecFuncao)this.idTable.retrieveDeclaration(f.id.spelling);
 				f.lista.visit(this);
+			}
+			
+				decl = (nodeDecFuncao)this.idTable.retrieveDeclaration(f.id.spelling);
 				
 				nodeDecVariavel declArgs = null;
 				
@@ -347,8 +349,6 @@ public class Checker implements Visitor {
 					
 				}
 			}
-		
-		}
 
 	}
 
