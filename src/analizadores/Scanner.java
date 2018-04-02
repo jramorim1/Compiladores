@@ -11,7 +11,7 @@ public class Scanner {
 	private InputStreamReader openFile;
 	private PushbackReader reader;
 	private int line=1;
-	private int column=0;
+	private int column=0;	
 	
 	private Character currentChar;
 	private byte currentCode;

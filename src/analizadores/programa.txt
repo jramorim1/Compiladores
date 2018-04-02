@@ -1,28 +1,17 @@
-program programaDeTesteValido1 ; 
-	var variavelInteira1, variavelInteira2 : integer ; 
-	
-	procedure procedimento ( ) ; 
-		var variavelDeProcedimento : real;
-		begin
-			variavelDeProcedimento := 29.200;
-			variavelInteira1 := variavelInteira1 * variavelInteira2;
-		end 
-	;
-	function funcao ( var parametroDeFuncao1 : integer ; var parametroDeFuncao2 : integer ; var p1 : real; var p2 : integer) : integer ;
-		var variavelDeFuncao : boolean ;
-		begin
-			if ( parametroDeFuncao1 >= parametroDeFuncao2 ) then
-				variavelInteira1 := 10
-			else
-				begin
-					variavelInteira1 := 5;
-					variavelInteira2 := variavelInteira1 * 10 + parametroDeFuncao1;
-					procedimento();
-				end
-				;
-		end 
-	;
-	begin  
-		variavelInteira1 := funcao(variavelInteira1, variavelInteira2);
-	end
-.
+program teste ;
+   var a, b: real;
+   var x, y : boolean;
+   var z : array[1..10] of array[1..10] of integer;
+   
+   function  funcao1(var a, b: integer) : real;
+   var c : integer;
+      begin
+         funcao1 := a * b ;
+         if(x <> y) then a := b;
+      end;
+
+   begin  
+      a := 7; b := 13;
+      a := 3 + funcao1(15, 20 + 2);   !// the result is .
+      b := 1 * funcao1(14, ((5 * 5) * 2)) ;  !// the result is . 
+   end.   !// this is the end of the program

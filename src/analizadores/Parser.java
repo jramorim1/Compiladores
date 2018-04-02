@@ -89,6 +89,8 @@ public class Parser {
 				id = new nodeIdentificador();
 				id.spelling = currentToken.spelling;
 				id.code = currentToken.code;
+				id.linha = currentToken.linha;
+				id.coluna = currentToken.coluna;
 				currentToken = this.scanner.scan();
 			}else {
 				SyntacticError1(currentToken);
@@ -168,14 +170,18 @@ public class Parser {
 	}
 	
 	private nodeExpressao parseSeletor() {
-		nodeExpressao e=null;
+		sequencialExpressao first, last, d;
+		first = null;
+		last = null;
 		while(currentToken.code == Token.LCOL) {
 			acceptIt();
-			sequencialExpressao current = new sequencialExpressao(e, parseExpressao());
-			e = current;
+			d = new sequencialExpressao(parseExpressao(),null);
+			if(first == null) first = d;
+			else last.next = d;
+			last = d;
 			accept(Token.RCOL);
 		}
-		return e;
+		return first;
 	}
 	
 	private boolean compare(byte code) {
@@ -533,10 +539,15 @@ public class Parser {
     	nodeParametro p = new nodeParametro();
     	p.lista = (nodeDecVariavel)parseDeclaracaoDeVariavel();
     	nodeDecVariavel d = p.lista;
+    	while(d.next != null)
+    		d = (nodeDecVariavel)d.next;
+    	
     	while(compare(Token.SEMICOLON)) {
     		acceptIt();
     		d.next = (nodeDecVariavel)parseDeclaracaoDeVariavel();
     		d = (nodeDecVariavel)d.next;
+    		while(d.next != null)
+        		d = (nodeDecVariavel)d.next;
     	}
     	return p;
     	/*nodeParametro last;

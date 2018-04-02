@@ -26,6 +26,27 @@ public class Checker implements Visitor {
 			if(le.next != null) {le.next.visit(this);}
 		}
 	}
+	
+	private byte compareAtrib(byte t1, byte t2) {
+		
+			
+		if( t1 == Token.REAL &&  t2 == Token.REAL) 
+			return Token.REAL;
+		
+			else if((t1 == Token.REAL && t2 == Token.INTEGER))
+				return Token.REAL;
+		
+			else if(t1 == Token.INTEGER && t2 == Token.INTEGER)
+				return Token.INTEGER;
+		
+			else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
+				return Token.BOOLEAN;
+			else {
+				System.out.println("Incorrect Types!");
+				System.exit(0);
+			}
+		return 0;
+	}
 
 	@Override
 	public void visitAtribComando(nodeAtribComando a) {
@@ -44,11 +65,7 @@ public class Checker implements Visitor {
 			byte varTipo = this.idTable.retrieve(a.var.id.spelling);
 			byte expTipo = a.expressao.tipo;
 			
-			if(varTipo != expTipo) {
-				System.out.println("Incorrect Types");
-				System.exit(0);
-			}
-			
+			compareAtrib(varTipo, expTipo);
 		}
 
 	}
@@ -182,13 +199,14 @@ public class Checker implements Visitor {
 		byte tipo1 = e.left.tipo;
 		byte tipo2 = e.right.tipo;
 		byte op = e.op.op.code;
+		String opAux = e.op.op.spelling;
 		
-		e.tipo = compareTypes(tipo1, tipo2, op);
+		e.tipo = compareTypes(tipo1, tipo2, op, opAux);
 		
 			}
 		}
 	
-	private byte compareTypes(byte t1, byte t2, byte op) {
+	private byte compareTypes(byte t1, byte t2, byte op, String opAux) {
 		if(op == Token.OPAD || op == Token.OPMUL) {
 			
 		if( t1 == Token.REAL &&  t2 == Token.REAL) 
@@ -200,8 +218,8 @@ public class Checker implements Visitor {
 			else if(t1 == Token.INTEGER && t2 == Token.INTEGER)
 				return Token.INTEGER;
 		
-			else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
-				return Token.BOOLEAN;
+			/*else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
+				return Token.BOOLEAN;*/
 			else {
 				System.out.println("Incorrect Types!");
 				System.exit(0);
@@ -216,7 +234,7 @@ public class Checker implements Visitor {
 				else if(t1 == Token.INTEGER && t2 == Token.INTEGER)
 					return Token.BOOLEAN;
 			
-				else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN)
+				else if(t1 == Token.BOOLEAN && t2 == Token.BOOLEAN && (opAux.compareTo("=") == 0 || opAux.compareTo("<>") == 0))
 					return Token.BOOLEAN;
 				else {
 					System.out.println("Incorrect Types!");
@@ -282,12 +300,53 @@ public class Checker implements Visitor {
 	}
 
 	@Override
-	public void visitFatorFunc(nodeFatorFunc f) {
+	public void visitFatorFunc(nodeFatorFunc f) { //VERIFICAR QUANTIDADE DE PARAMETROS
 		if(f != null) {
+			nodeDecFuncao decl;
 			if(f.id != null) {
 				f.tipo = this.idTable.retrieve(f.id.spelling);
 			}
-			if(f.lista != null) f.lista.visit(this);
+			if(f.lista != null) {
+				decl = (nodeDecFuncao)this.idTable.retrieveDeclaration(f.id.spelling);
+				f.lista.visit(this);
+				
+				nodeDecVariavel declArgs = null;
+				
+				if(decl.lista != null) {
+					declArgs = decl.lista.lista;
+				}
+				sequencialExpressao chamadaArgs = (sequencialExpressao)f.lista;
+				
+				if(chamadaArgs == null && declArgs != null) {
+					System.out.println("Missing Arguments to Declaration in line " + decl.id.linha + " .");
+					System.exit(0);
+				}else if(chamadaArgs != null && declArgs == null) {
+					System.out.println("Exeded Arguments to Declaration in line " + decl.id.linha + " .");
+					System.exit(0);
+				}
+				
+				while(declArgs != null || chamadaArgs != null) {
+					
+					if(chamadaArgs == null && declArgs != null) {
+						System.out.println("Missing Arguments to Declaration in line " + decl.id.linha + " .");
+						System.exit(0);
+					}
+					else if(chamadaArgs != null && declArgs == null) {
+						System.out.println("Exeded Arguments to Declaration in line " + decl.id.linha + " .");
+						System.exit(0);
+					}else
+						if(chamadaArgs.exp.tipo != ((nodeTipoSimples)declArgs.tipo).tipo){
+							System.out.println("Type of Incorrect Arguments to Declaration in line " + decl.id.linha + " .");
+							System.exit(0);
+						}
+					else {
+					
+					chamadaArgs = (sequencialExpressao)chamadaArgs.next;
+					declArgs = (nodeDecVariavel)declArgs.next;
+					}
+					
+				}
+			}
 		
 		}
 
@@ -499,6 +558,15 @@ public class Checker implements Visitor {
 	public void visitSeletor(nodeSeletor s) {
 		if(s != null) {
 			if(s.lista != null) s.lista.visit(this);
+			sequencialExpressao e = (sequencialExpressao)s.lista;
+			while(e != null) {
+				byte tipo = e.exp.tipo;
+				if(tipo != Token.INTEGER) {
+					System.out.println("Array Operands Must Be Integer.");
+					System.exit(0);
+				}
+				e = (sequencialExpressao)e.next;
+			}
 		}
 	}
 }

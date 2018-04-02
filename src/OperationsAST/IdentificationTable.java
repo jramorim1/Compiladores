@@ -50,6 +50,33 @@ public class IdentificationTable {
 			return 0;
 	}
 	
+	public nodeDeclaracao retrieveDeclaration(String id) {
+		Data temp = null;
+		
+		for(int i=0; i<table.size();i++) { 
+			
+			if(table.get(i).id.compareTo(id) == 0) { 
+				
+				int localTemp = table.get(i).local;
+				
+					for(int j=0; j<table.size(); j++) {
+						if(table.get(i).id.compareTo(table.get(j).id) == 0 && table.get(j).local >= localTemp) {
+							
+							temp = table.get(j);
+							localTemp = temp.local;
+							
+						}
+					}
+					
+				return temp.decl; //Função deve retornar o ponteiro da declaração da variavel
+								//Se houver mais de uma declaração, retornar aquela de maior Scopo
+			}
+		}
+			System.out.println("Variavel " + id + " não declarada");
+			System.exit(0);
+			return null;
+	}
+	
 	public void openScope() {
 		this.scope++;
 	}

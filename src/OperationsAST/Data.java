@@ -37,7 +37,7 @@ public class Data {
 						return ((nodeTipoSimples)t2).tipo;
 					}
 					else {
-						System.out.println("Exceded Array Dimension!");
+						System.out.println("Exceded Array Dimension in line " + ((nodeDecVariavel)decl).id.linha);
 						System.exit(0);
 					}
 				}
