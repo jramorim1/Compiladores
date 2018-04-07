@@ -3,6 +3,8 @@ import analizadores.*;
 
 public class nodeEn extends nodeExpressao {
 public Token name;
+public int level;
+public int posicao;
 //public byte tipo;
 
 	public nodeEn(Token n) {

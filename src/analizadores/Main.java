@@ -29,9 +29,11 @@ public class Main {
 		nodePrograma p;
 		Printer printer = new Printer();
 		Checker checker = new Checker();
+		Coder coder = new Coder();
 		p = parser.parse();
 		//printer.print(p);
 		checker.check(p);
+		coder.code(p);
 		System.out.println("End.");
 	
 		}catch(Exception e){
