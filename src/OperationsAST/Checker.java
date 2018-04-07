@@ -176,16 +176,26 @@ public class Checker implements Visitor {
 	public void visitEn(nodeEn e) {
 		if(e != null) 
 			if(e.name != null) {//verificar se nao é literal
-				if(e.name.code == Token.INTLITERAL)
+				if(e.name.code == Token.INTLITERAL) {
 					e.tipo = Token.INTEGER;
+					e.size = 2;
+				}
 				else 
-					if(e.name.code == Token.FLOATLIT)
+					if(e.name.code == Token.FLOATLIT) {
 						e.tipo = Token.REAL;
+						e.size = 4;
+					}
 				else
-					if(e.name.code == Token.BOOLLIT)
+					if(e.name.code == Token.BOOLLIT) {
 						e.tipo = Token.BOOLEAN;
-				else
+						e.size = 1;
+					}
+				else {
 				e.tipo = this.idTable.retrieve(e.name.spelling);
+				e.size = this.idTable.retrieveDeclaration(e.name.spelling).size;
+				e.level = this.idTable.retrieveDeclaration(e.name.spelling).level;
+				}
+				
 			}
 	}
 
@@ -303,6 +313,7 @@ public class Checker implements Visitor {
 	public void visitFatorFunc(nodeFatorFunc f) { //VERIFICAR QUANTIDADE DE PARAMETROS
 		if(f != null) {
 			nodeDecFuncao decl;
+		f.decl = this.idTable.retrieveDeclaration(f.id.spelling);
 			if(f.id != null) {
 				f.tipo = this.idTable.retrieve(f.id.spelling);
 			}

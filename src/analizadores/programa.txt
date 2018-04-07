@@ -1,17 +1,22 @@
 program teste ;
-   var a, b, t: real;
-   var x, y : boolean;
-   var z : array[1..1] of array[1..10] of integer;
+var a : real;
    
-   function  funcao1() : real;
+    function  funcao1(var a,b: real; var e,d: integer) : real;
    var c : integer;
+   
+   function funcao2(var i: real):integer;
+   var c: integer;
+   begin
+   
+   end;
+   
       begin
-         funcao1 := a ;
-         if(x) then t:=b;
+      	c := funcao2(1.0);
+         funcao1 := 0;
       end;
-
+   
    begin  
-      a := 7; b := 13;
-      a := funcao1();   !// the result is .
-      b := 1 * funcao1() ;  !// the result is . 
+    !  a := 7; b := 13;
+      a := funcao1(0.0,0.0,0,0);   !// the result is .
+      !b := 1 * funcao1(0,0,0,0) ;  !// the result is . 
    end.   !// this is the end of the program

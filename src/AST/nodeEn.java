@@ -5,6 +5,7 @@ public class nodeEn extends nodeExpressao {
 public Token name;
 public int level;
 public int posicao;
+public int size;
 //public byte tipo;
 
 	public nodeEn(Token n) {
