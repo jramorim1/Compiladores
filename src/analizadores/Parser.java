@@ -1,22 +1,33 @@
 package analizadores;
 
+import java.awt.event.ActionListener;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PushbackReader;
+
 import AST.*;
+
 
 public class Parser {
 	
+	private FileInputStream file;
+	private InputStreamReader openFile;
+	private PushbackReader reader;
 	private Token currentToken;
 	private Scanner scanner;
+	View view;
 	
-	public Parser(String path) throws IOException{
-		scanner = new Scanner(path);
+	public Parser(String path, View v) throws IOException{
+		view = v;
+		scanner = new Scanner(path, v);
 	}
 	
 	private void acceptIt(){
 		try {
 		currentToken = this.scanner.scan();
 		}catch(IOException e) {
-			System.out.println(e.getMessage());
+			view.tC.append(e.getMessage());
 			}
 	}
 	
@@ -29,7 +40,7 @@ public class Parser {
 		}
 		
 		}catch(IOException e) {
-			System.out.println(e.getMessage());
+			view.tC.append(e.getMessage());
 		}
 	}
 	
@@ -39,34 +50,45 @@ public class Parser {
 		currentToken = scanner.scan();
 		
 		if(compare(Token.EOF)) {
-				System.out.println("Erro: Nenhum texto foi encontrado!");
+			if(scanner.EFlag == 0) {
+				view.tC.append("Error: File not found!");
+				scanner.EFlag =1;
+				view.Ef = 1;
+			}
 				return null;
 			}
 		
 		p = parsePrograma();
 		
 		if(compare(Token.EOF)) {
-			System.out.println("Compilado!");
+			if(scanner.EFlag==0)
+			view.tC.append("Compiled!");
 		}
 		return p;
 		
 		}catch(IOException e) {
-			System.out.println(e.getMessage());
+			view.tC.append(e.getMessage());
 		}
 		return p;
 	}
 	
 	private void LexicError(Token t) {
-		System.out.println("Erro line " + t.linha + " colum "+ t.coluna + "Token "+ t.spelling + " is not acceptable.");
+		view.tC.append("Lexical Error line " + t.linha + " colum "+ t.coluna + "Token "+ t.spelling + " is not acceptable.");
 	}
 	
 	private void SyntacticError1(Token t){
-		System.out.println("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Unexpected token "+t.spelling+ ".");
-		System.exit(0);
+	
+		if(scanner.EFlag == 0)
+		{
+		view.tC.append("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Unexpected token "+t.spelling+ ".");
+		}
+		scanner.EFlag = 1;
+		view.Ef = 1;
+
 	}
 	
 	private void SyntacticError2(Token t){
-		System.out.println("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Missing token "+t.spelling+ ".");
+		view.tC.append("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Missing token "+t.spelling+ ".");
 		
 	}
 	
@@ -97,7 +119,7 @@ public class Parser {
 			}
 
 		}catch(IOException e) {
-			System.out.println(e.getMessage());
+			view.tC.append(e.getMessage());
 		}
 		return id;
 	}
@@ -382,7 +404,7 @@ public class Parser {
     		SyntacticError1(currentToken);
     	}
     	}catch(IOException e) {
-    		System.out.println(e.getMessage());
+    		view.tC.append(e.getMessage());
     	}
     	return opAST;
     }
@@ -407,7 +429,7 @@ public class Parser {
     		currentToken = this.scanner.scan();
     		
     	}catch(IOException e) {
-    		System.out.println(e.getMessage());
+    		view.tC.append(e.getMessage());
     	}
     	return litAST;
 	}
@@ -624,7 +646,7 @@ public class Parser {
 			t.tipo = currentToken.code;
 			currentToken = this.scanner.scan();
 			}catch(IOException e){
-				System.out.println(e.getMessage());
+				view.tC.append(e.getMessage());
 			}
 		break;
 		

@@ -9,16 +9,21 @@ import java.io.PushbackReader;
 public class Scanner {
 	private FileInputStream file;
 	private InputStreamReader openFile;
-	private PushbackReader reader;
+	PushbackReader reader;
 	private int line=1;
 	private int column=0;	
-	
+	public int EFlag;
 	private Character currentChar;
 	private byte currentCode;
 	private StringBuffer currentSpelling;
+	View view;
 	
-	public Scanner(String path){
+	
+	public Scanner(String path, View v){
 		try {
+		view = v;
+		EFlag = 0;
+		view.Ef = 0;
 		this.file = new FileInputStream(path);
 		this.openFile = new InputStreamReader(this.file);
 		this.reader = new PushbackReader(this.openFile);
@@ -205,9 +210,14 @@ private void scanSeparator() throws IOException{
 //metodo que retorna um token do buffer
 public Token scan() throws IOException{
 		
-	if(isNull())
+	if(isNull()) {
+		if(EFlag == 0 && line==1) {
+		view.tC.append("Error: File not found!");
+		EFlag = 1;
+		view.Ef = 1;
+		}
 		return new Token(Token.EOF,"EOF",line,column);
-	
+	}
 	while(compare(' ')|| compare('\n') || compare('\r') || compare('!') || compare((char)9)){
 		scanSeparator();
 		if(isNull())
@@ -217,6 +227,22 @@ public Token scan() throws IOException{
 	
 	currentSpelling = new StringBuffer("");
 	currentCode = scanToken();
+	
+	if(currentCode == Token.EOF) {
+		if(EFlag == 0) {
+		view.tC.append("Error: File not found");
+		EFlag = 1;
+		view.Ef = 1;
+		}
+	}
+	
+	if(currentCode == Token.ERRO) {
+		if(EFlag == 0) {
+		view.tC.append("Error line " + line + " column "+ column + " Token "+ currentSpelling + " is not acceptable.");
+		EFlag=1;
+		view.Ef = 1;
+		}
+	}
 	
 	return new Token(currentCode,currentSpelling.toString(),line,column-currentSpelling.toString().length());
 	
@@ -228,7 +254,11 @@ private void take(Character expected) throws IOException{
 		currentSpelling.append(expected);
 		currentChar = getChar();
 	}else{
-	//erro lexico
+		if(EFlag == 0) {
+			view.tC.append("Error line " + line + " column "+ column + "Token "+ currentSpelling + " is not acceptable.");
+			EFlag=1;
+			view.Ef = 1;
+			}
 	}
 }
 

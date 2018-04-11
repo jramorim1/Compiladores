@@ -1,7 +1,6 @@
 package OperationsAST;
 
 import java.io.FileWriter;
-import OperationsAST.Stack;
 import java.io.IOException;
 import java.io.File;
 import AST.*;
@@ -11,11 +10,8 @@ public class Coder implements Visitor{
 	
 	FileWriter arquivo;
 	File codigo;
-	Stack pilha;
-	boolean running = false;
 	
 	public Coder() {
-		this.pilha = new Stack();
 		this.codigo = new File("C:\\Users\\oieus\\Documents\\arquivo.txt");
 		try {
 		arquivo = new FileWriter(this.codigo);
@@ -37,7 +33,6 @@ public class Coder implements Visitor{
 		if(p != null) {
 		emit(Instruction.LOAD, Instruction.SB, 0, 1);
 		 p.visit (this);
-		 
 		}
 	}
 	
@@ -121,11 +116,11 @@ public void visitDecFuncao(nodeDecFuncao df) {
 	if(df != null) {
 		
 		if(df.id != null) df.id.visit(this);
+		
 		if(df.lista != null) df.lista.visit(this);
-	
 		if(df.tipo != null) df.tipo.visit(this);
-		//this.pilha.pushFrame(); //insere os links e atualiza os ponteiros
 		if(df.corpo != null) df.corpo.visit(this);
+		
 	}
 
 
@@ -165,7 +160,6 @@ public void visitDecVariavel(nodeDecVariavel dv) {
 	if(dv != null) {
 		//idTable.enter(dv.id.spelling, dp);
 		//if(dv.lista != null) dv.id.visit(this);
-		//pilha.push(dv, dv.size);
 		if(dv.id != null) dv.id.visit(this);
 		if(dv.tipo != null) dv.tipo.visit(this);
 		if(dv.next != null) dv.next.visit(this);
@@ -247,30 +241,12 @@ public void visitFator(nodeFator f) {
 @Override
 public void visitFatorFunc(nodeFatorFunc f) { //VERIFICAR QUANTIDADE DE PARAMETROS
 	if(f != null) {
+		nodeDecFuncao decl;
 		if(f.id != null) {
 		}
-		nodeDecVariavel declArgs = ((nodeDecFuncao)f.decl).lista.lista;
-		
-		while(declArgs != null) {
-			this.pilha.push(declArgs, declArgs.size);
-			declArgs = (nodeDecVariavel)declArgs.next;
-		}
-		
 		if(f.lista != null) {
 			f.lista.visit(this);
 		}
-		this.pilha.pushFrame();
-		sequencialDeclaration declaracoes = ((sequencialDeclaration)((nodeDecFuncao)f.decl).corpo.declarations);
-		
-		while(declaracoes != null) {
-			if(declaracoes.D1 instanceof nodeDecVariavel) {
-				nodeDecVariavel var = ((nodeDecVariavel)declaracoes.D1);
-				int size = var.size;
-				this.pilha.push(var, size);
-			}
-			declaracoes = (sequencialDeclaration)declaracoes.D2;
-		}
-		
 	}
 }
 
@@ -328,7 +304,6 @@ public void visitPrograma(nodePrograma p) {
 	if(p != null) {
 		if(p.corpo != null) {
 			p.corpo.visit(this);
-			
 		}
 	}
 }

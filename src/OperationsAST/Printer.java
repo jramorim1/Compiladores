@@ -1,6 +1,12 @@
 package OperationsAST;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PushbackReader;
+
 import AST.*;
 import analizadores.Token;
+import analizadores.View;
 
 /* Classe responsável por imprimir a AST
  * Implementa a interface Visitor
@@ -10,19 +16,24 @@ import analizadores.Token;
 
 public class Printer implements Visitor{
 	
+	View view;
 	private int coluna = 0;
 	
+	public Printer(View v){
+		view = v;
+	}
+	
 	public void print (nodePrograma p) {
-		if(p != null) {
-		 System.out.println ("*********[ Starting the AST Printing Process ]**********\n");
+		if(p != null && view.Ef == 0) {
+		 view.tA.append ("*********[ Starting the AST Printing Process ]**********" + "\n");
 		 p.visit (this);
-		 System.out.println("\n[End of AST]");
+		 view.tA.append("\n"+"[End of AST]");
 		}else
-			System.out.println("No program compiled");		 }
+			view.tA.append("No program compiled");		 }
 	
 	private void indent() {
 	      for (int j=0; j<coluna; j++) 
-	         System.out.print ("|");
+	         view.tA.append ("|");
 	   }
 
 
@@ -56,10 +67,10 @@ public class Printer implements Visitor{
 	public void visitAtribComando(nodeAtribComando a) {
 		if(a != null) {
 			//indent();
-			System.out.println(":=");
+			view.tA.append(":=" + "\n");
 			if(a.var.id != null)
 				indent();
-				System.out.println("$"+a.var.id.spelling);
+				view.tA.append("$"+a.var.id.spelling + "\n");
 			if(a.var.exp != null) {
 				a.var.exp.visit(this);
 			}
@@ -106,9 +117,9 @@ public class Printer implements Visitor{
 	public void visitCorpo(nodeCorpo c) {
 		if(c != null) {
 			if(c.declarations != null) {
-				//System.out.println("/#");
+				//view.tA.append("/#");
 					c.declarations.visit(this);
-					//System.out.println("#/");
+					//view.tA.append("#/");
 			}
 			
 			if(c.comandos != null) 
@@ -198,7 +209,7 @@ public class Printer implements Visitor{
 			if(e.name != null) {
 				 coluna++;
 				 indent();
-				System.out.println(e.name.spelling);
+				view.tA.append(e.name.spelling + "\n");
 				coluna--;
 			}
 		 }
@@ -242,9 +253,9 @@ public class Printer implements Visitor{
 			 else if(e instanceof nodeFator)
 				 ((nodeFator)e).visit(this);
 			 else if(e instanceof nodeSeletor) {
-				 System.out.print("[");
+				 view.tA.append("[" + "\n");
 				 ((nodeSeletor)e).visit(this);
-				 System.out.print("]");
+				 view.tA.append("]" + "\n");
 			 }
 		 }
 		
@@ -274,7 +285,7 @@ public class Printer implements Visitor{
 		 if(f != null) {
 			if(f.id != null) {
 				indent();
-				System.out.println(f.id.spelling);
+				view.tA.append(f.id.spelling + "\n");
 				}
 			
 			 if(f.lista != null) {
@@ -295,7 +306,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitIdentificador(nodeIdentificador i) {
 		//indent();
-		System.out.println(i.spelling);
+		view.tA.append(i.spelling + "\n");
 	}
 
 	@Override
@@ -304,16 +315,16 @@ public class Printer implements Visitor{
 			
 			if(c.comandoIf != null) {
 				indent();
-				System.out.println("if");
+				view.tA.append("if" + "\n");
 				
 				c.expressao.visit(this);
 				indent();
-				System.out.println("then");
+				view.tA.append("then" + "\n");;
 				indent();
 				c.comandoIf.visit(this);
 				if(c.comandoElse != null) {
 					indent();
-					System.out.println("else");
+					view.tA.append("else" + "\n");
 					c.comandoElse.visit(this);
 				}
 			}
@@ -323,13 +334,13 @@ public class Printer implements Visitor{
 
 	@Override
 	public void visitLiteral(nodeLiteral l) {
-		System.out.println(l.spelling);
+		view.tA.append(l.spelling + "\n");
 		
 	}
 
 	@Override
 	public void visitOperator(nodeOperator o) {
-		System.out.println(o.op.spelling);
+		view.tA.append(o.op.spelling + "\n");
 	}
 
 	@Override
@@ -356,7 +367,7 @@ public class Printer implements Visitor{
 	@Override
 	public void visitPrograma(nodePrograma p) {
 		if(p != null) {
-			System.out.println(p.id.spelling);
+			view.tA.append(p.id.spelling + "\n");
 			if(p.corpo != null)
 				p.corpo.visit(this);
 		}
@@ -390,11 +401,11 @@ public class Printer implements Visitor{
 		 if(t != null) {
 			 coluna++;
 			 indent();
-			 System.out.println("array");
+			 view.tA.append("array" + "\n");
 			 indent();
-			 System.out.println(t.intLeft.spelling);
+			 view.tA.append(t.intLeft.spelling + "\n");
 			 indent();
-			 System.out.println(t.intRight.spelling);
+			 view.tA.append(t.intRight.spelling + "\n");
 			 t.tipo.visit(this);
 		 }
 	}
@@ -404,7 +415,7 @@ public class Printer implements Visitor{
 		 if(t != null) {
 			 coluna++;
 			 indent();
-			 System.out.println(Token.SPELLINGS[t.tipo]);
+			 view.tA.append(Token.SPELLINGS[t.tipo] + "\n");
 			 coluna--;
 		 }
 		
@@ -415,7 +426,7 @@ public class Printer implements Visitor{
 		 if(v != null) {
 			 coluna++;
 			 indent();
-			 System.out.println(v.id.spelling);
+			 view.tA.append(v.id.spelling + "\n");
 			 coluna--;
 			 if(v.exp != null) v.exp.visit(this);
 		 }
@@ -425,10 +436,10 @@ public class Printer implements Visitor{
 	@Override
 	public void visitWhileComando(nodeWhileComando w) {
 		if(w != null) {
-		 System.out.println("while");
+		 view.tA.append("while" + "\n");
 		 w.expressao.visit(this);
 		 indent();
-		 System.out.println("do");
+		 view.tA.append("do" + "\n");
 		 //indent();
 		 w.comando.visit(this);
 		}

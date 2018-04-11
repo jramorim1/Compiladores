@@ -20,7 +20,6 @@ public class IdentificationTable {
 				System.exit(0);
 			}
 		}
-		decl.level = scope;
 		this.table.add(data);
 	}
 	
