@@ -212,7 +212,7 @@ public Token scan() throws IOException{
 		
 	if(isNull()) {
 		if(EFlag == 0 && line==1) {
-		view.tC.append("Error: File not found!");
+		view.tC.append("Error: Source File not found!");
 		EFlag = 1;
 		view.Ef = 1;
 		}
@@ -230,7 +230,7 @@ public Token scan() throws IOException{
 	
 	if(currentCode == Token.EOF) {
 		if(EFlag == 0) {
-		view.tC.append("Error: File not found");
+		view.tC.append("Error: Source File not found");
 		EFlag = 1;
 		view.Ef = 1;
 		}
@@ -238,7 +238,7 @@ public Token scan() throws IOException{
 	
 	if(currentCode == Token.ERRO) {
 		if(EFlag == 0) {
-		view.tC.append("Error line " + line + " column "+ column + " Token "+ currentSpelling + " is not acceptable.");
+		view.tC.append("Error row " + line + " column "+ column + " Token "+ currentSpelling + " is not acceptable.");
 		EFlag=1;
 		view.Ef = 1;
 		}
@@ -255,7 +255,7 @@ private void take(Character expected) throws IOException{
 		currentChar = getChar();
 	}else{
 		if(EFlag == 0) {
-			view.tC.append("Error line " + line + " column "+ column + "Token "+ currentSpelling + " is not acceptable.");
+			view.tC.append("Error row " + line + " column "+ column + "Token "+ currentSpelling + " is not acceptable.");
 			EFlag=1;
 			view.Ef = 1;
 			}

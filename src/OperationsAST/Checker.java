@@ -362,14 +362,14 @@ public class Checker implements Visitor {
 					}
 					else if(chamadaArgs != null && declArgs == null && view.Ef ==0) {
 						if(view.Ef == 0) {
-							view.tC.append("Exceeded Arguments in Declaration on line " + decl.id.linha + " .");
+							view.tC.append("Exceeded Arguments in Declaration on row " + decl.id.linha + " .");
 								view.Ef = 1;
 							}
 						
 					}else
 						if(chamadaArgs.exp.tipo != ((nodeTipoSimples)declArgs.tipo).tipo){
 							if(view.Ef == 0) {
-								view.tC.append("Type of Incorrect Arguments in Declaration on line " + decl.id.linha + " .");
+								view.tC.append("Type of Incorrect Arguments in Declaration on row " + decl.id.linha + " .");
 									view.Ef = 1;
 								}
 						}

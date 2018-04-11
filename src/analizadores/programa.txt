@@ -1,7 +1,7 @@
 program test;
 var cache : array [1..100] of integer;
 
-procedure initCache();
+procedure initCache(var y: integer);
 var i : integer;
 begin
    i := 1;

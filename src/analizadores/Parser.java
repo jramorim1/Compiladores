@@ -51,7 +51,7 @@ public class Parser {
 		
 		if(compare(Token.EOF)) {
 			if(scanner.EFlag == 0) {
-				view.tC.append("Error: File not found!");
+				view.tC.append("Error: Source File not found!");
 				scanner.EFlag =1;
 				view.Ef = 1;
 			}
@@ -73,14 +73,14 @@ public class Parser {
 	}
 	
 	private void LexicError(Token t) {
-		view.tC.append("Lexical Error line " + t.linha + " colum "+ t.coluna + "Token "+ t.spelling + " is not acceptable.");
+		view.tC.append("Lexical Error row " + t.linha + " column "+ t.coluna + "Token "+ t.spelling + " is not acceptable.");
 	}
 	
 	private void SyntacticError1(Token t){
 	
 		if(scanner.EFlag == 0)
 		{
-		view.tC.append("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Unexpected token "+t.spelling+ ".");
+		view.tC.append("Syntaxe Error: row "+ t.linha + " column " + t.coluna + ". Unexpected token "+t.spelling+ ".");
 		}
 		scanner.EFlag = 1;
 		view.Ef = 1;
@@ -88,7 +88,7 @@ public class Parser {
 	}
 	
 	private void SyntacticError2(Token t){
-		view.tC.append("Syntaxe Error: line "+ t.linha + " colum " + t.coluna + ". Missing token "+t.spelling+ ".");
+		view.tC.append("Syntaxe Error: row "+ t.linha + " column " + t.coluna + ". Missing token "+t.spelling+ ".");
 		
 	}
 	
